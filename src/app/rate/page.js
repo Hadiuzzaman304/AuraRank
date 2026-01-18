@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { persons } from "@/data/persons";
@@ -29,6 +29,15 @@ export default function RatePage() {
       persons.map((p) => [p.id, { front: 0, left: 0, right: 0, back: 0 }])
     )
   );
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const person = persons[index];
 
@@ -63,6 +72,8 @@ export default function RatePage() {
 
   const progressPercent = ((index + 1) / persons.length) * 100;
 
+  /* ================= END SCREEN ================= */
+
   if (!person) {
     return (
       <>
@@ -73,7 +84,6 @@ export default function RatePage() {
               Thank you for your response
             </h2>
 
-            {/* 🔴 RED AURA HOVER HERE */}
             <a
               href="/standings"
               style={endButton}
@@ -97,6 +107,8 @@ export default function RatePage() {
     );
   }
 
+  /* ================= MAIN UI ================= */
+
   return (
     <>
       <Header />
@@ -104,7 +116,11 @@ export default function RatePage() {
       <main style={{ ...auraBackground, paddingTop: "78px" }}>
         <div style={container}>
           <div
-            style={card}
+            style={{
+              ...card,
+              width: isMobile ? "92vw" : card.width,
+              padding: isMobile ? "26px" : card.padding,
+            }}
             onMouseEnter={(e) => {
               e.currentTarget.style.boxShadow =
                 "0 40px 90px rgba(0,0,0,0.85)";
@@ -115,16 +131,7 @@ export default function RatePage() {
             }}
           >
             {/* PROGRESS */}
-            <div
-              style={progressSection}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.filter =
-                  "drop-shadow(0 0 6px rgba(0,0,0,0.8))";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.filter = "none";
-              }}
-            >
+            <div style={progressSection}>
               <span style={progressLabel}>Progress</span>
 
               <div style={progressTrack}>
@@ -145,42 +152,25 @@ export default function RatePage() {
 
             <img
               src={selection.img}
-              style={image}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "scale(1.03)";
-                e.currentTarget.style.boxShadow =
-                  "0 30px 60px rgba(0,0,0,0.85)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "scale(1)";
-                e.currentTarget.style.boxShadow =
-                  "0 20px 40px rgba(0,0,0,0.6)";
+              style={{
+                ...image,
+                width: isMobile ? "100%" : image.width,
+                maxWidth: "320px",
               }}
             />
 
-            {/* RATING BUTTONS — BLACK GLASS HOVER */}
-            <div style={buttonRow}>
+            {/* BUTTONS */}
+            <div
+              style={{
+                ...buttonRow,
+                flexWrap: isMobile ? "wrap" : "nowrap",
+              }}
+            >
               {[1, 2, 3, 4, 5].map((n) => (
                 <button
                   key={n}
                   onClick={() => rate(n)}
                   style={ratingBtn}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background =
-                      "rgba(0,0,0,0.35)";
-                    e.currentTarget.style.boxShadow =
-                      "0 0 18px rgba(0,0,0,0.9)";
-                    e.currentTarget.style.borderColor =
-                      "rgba(255,255,255,0.4)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background =
-                      "rgba(255,255,255,0.08)";
-                    e.currentTarget.style.boxShadow =
-                      "0 12px 30px rgba(0,0,0,0.35)";
-                    e.currentTarget.style.borderColor =
-                      "rgba(255,255,255,0.25)";
-                  }}
                 >
                   {n}
                 </button>
@@ -226,7 +216,6 @@ const card = {
 const progressSection = {
   textAlign: "left",
   marginBottom: "22px",
-  transition: "all 0.3s ease",
 };
 
 const progressLabel = {
@@ -284,13 +273,10 @@ const ratingBtn = {
   border: "1px solid rgba(255,255,255,0.25)",
   background: "rgba(255,255,255,0.08)",
   backdropFilter: "blur(14px)",
-  WebkitBackdropFilter: "blur(14px)",
   color: "#ffbf69",
   fontSize: "20px",
   fontWeight: "700",
   cursor: "pointer",
-  boxShadow: "0 12px 30px rgba(0,0,0,0.35)",
-  transition: "all 0.25s ease",
 };
 
 /* DEFINING LINE */
@@ -300,7 +286,6 @@ const defineLine = {
   fontSize: "15px",
   fontStyle: "italic",
   color: "#d1a3ff",
-  opacity: 0.95,
 };
 
 /* END SCREEN */

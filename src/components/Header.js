@@ -1,16 +1,38 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 export default function Header() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   return (
-    <header style={header}>
+    <header
+      style={{
+        ...header,
+        padding: isMobile ? "8px 14px" : header.padding,
+        height: isMobile ? "auto" : header.height,
+      }}
+    >
       {/* LOGO */}
       <a
         href="/"
-        style={logoWrap}
+        style={{
+          ...logoWrap,
+          alignItems: isMobile ? "center" : "flex-start",
+        }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.transform = "translateY(-1px)";
-          e.currentTarget.style.textShadow =
-            "0 0 14px rgba(255,59,59,0.9)";
+          if (!isMobile) {
+            e.currentTarget.style.transform = "translateY(-1px)";
+            e.currentTarget.style.textShadow =
+              "0 0 14px rgba(255,59,59,0.9)";
+          }
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.transform = "translateY(0)";
@@ -24,7 +46,14 @@ export default function Header() {
       </a>
 
       {/* NAV */}
-      <nav style={nav}>
+      <nav
+        style={{
+          ...nav,
+          justifyContent: isMobile ? "center" : "flex-end",
+          width: isMobile ? "100%" : "auto",
+          marginTop: isMobile ? "8px" : "0",
+        }}
+      >
         <NavItem href="/">Home</NavItem>
         <NavItem href="/rate">Give Rating</NavItem>
         <NavItem href="/standings">AuraIndex</NavItem>
@@ -69,22 +98,20 @@ const header = {
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
+  flexWrap: "wrap",
 
-  /* ✅ SAFE PADDING */
   padding: "0 28px",
 
-  /* ✅ TRUE GLASS */
   background: "rgba(255,255,255,0.06)",
   backdropFilter: "blur(22px) saturate(160%)",
   WebkitBackdropFilter: "blur(22px) saturate(160%)",
 
   borderBottom: "1px solid rgba(255,255,255,0.14)",
 
-  /* ✅ FIXED HEADER — NO CLIPPING */
   position: "fixed",
   top: 0,
   left: 0,
-  right: 0,               // 🔥 KEY FIX
+  right: 0,
   zIndex: 100,
 
   boxSizing: "border-box",
@@ -114,8 +141,8 @@ const tagline = {
 
 const nav = {
   display: "flex",
-  gap: "12px",
-  flexWrap: "nowrap",
+  gap: "10px",
+  flexWrap: "wrap",
 };
 
 const navItem = {

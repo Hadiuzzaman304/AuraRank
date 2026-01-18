@@ -1,18 +1,37 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { auraBackground } from "@/styles/auraBackground";
 
 export default function About() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   return (
     <>
       <Header />
 
       <main style={auraBackground}>
-        <div style={wrap}>
+        <div
+          style={{
+            ...wrap,
+            paddingTop: isMobile ? "96px" : wrap.paddingTop,
+          }}
+        >
           <div
-            style={card}
+            style={{
+              ...card,
+              width: isMobile ? "92vw" : card.width,
+              padding: isMobile ? "28px 22px" : card.padding,
+            }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = "translateY(-6px)";
               e.currentTarget.style.boxShadow =
@@ -26,21 +45,48 @@ export default function About() {
           >
             {/* IMAGE */}
             <div style={imgWrap}>
-              <img src="/me.jpg" style={img} />
+              <img
+                src="/me.jpg"
+                style={{
+                  ...img,
+                  width: isMobile ? "130px" : img.width,
+                  height: isMobile ? "130px" : img.height,
+                }}
+              />
             </div>
 
             {/* NAME */}
-            <h2 style={name}>Hadiuzzaman Ome</h2>
+            <h2
+              style={{
+                ...name,
+                fontSize: isMobile ? "20px" : name.fontSize,
+              }}
+            >
+              Hadiuzzaman Ome
+            </h2>
 
             {/* TAGLINE */}
-            <p style={tagline}>CSE Undergraduate · AI Enthusiast</p>
+            <p
+              style={{
+                ...tagline,
+                fontSize: isMobile ? "12px" : tagline.fontSize,
+              }}
+            >
+              CSE Undergraduate · AI Enthusiast
+            </p>
 
             {/* INFO */}
             <div style={infoBox}>
               <Info label="Section" value="65-H" />
               <Info label="Student ID" value="232-15-304" />
-              <Info label="Department" value="Computer Science & Engineering" />
-              <Info label="University" value="Daffodil International University" />
+              <Info
+                label="Department"
+                value="Computer Science & Engineering"
+              />
+              <Info
+                label="University"
+                value="Daffodil International University"
+              />
             </div>
 
             {/* FOOT LINE */}
@@ -107,6 +153,7 @@ const img = {
   objectFit: "cover",
   border: "3px solid rgba(255,59,59,0.7)",
   boxShadow: "0 12px 30px rgba(0,0,0,0.7)",
+  transition: "all 0.3s ease",
 };
 
 const name = {

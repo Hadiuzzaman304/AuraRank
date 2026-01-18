@@ -10,6 +10,14 @@ const STORAGE_KEY = "aurarank-global";
 
 export default function Standings() {
   const [rows, setRows] = useState([]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
@@ -38,19 +46,36 @@ export default function Standings() {
     <>
       <Header />
       <main style={auraBackground}>
-        <div style={wrap}>
+        <div
+          style={{
+            ...wrap,
+            paddingTop: isMobile ? "96px" : wrap.paddingTop,
+          }}
+        >
           <h1 style={heading}>AuraIndex</h1>
 
           {/* ================= BAR GRAPH ================= */}
           <div style={chartBox}>
             <h3 style={chartTitle}>Average Rating Distribution</h3>
 
-            <div style={chart}>
+            <div
+              style={{
+                ...chart,
+                overflowX: isMobile ? "auto" : "visible",
+                paddingBottom: isMobile ? "10px" : "0",
+              }}
+            >
               {rows.map((r) => {
                 const heightPercent = (r.avg / maxAvg) * 100;
 
                 return (
-                  <div key={r.id} style={barItem}>
+                  <div
+                    key={r.id}
+                    style={{
+                      ...barItem,
+                      minWidth: isMobile ? "64px" : "auto",
+                    }}
+                  >
                     <div style={barContainer}>
                       <div
                         style={{
@@ -58,7 +83,8 @@ export default function Standings() {
                           height: `${Math.max(heightPercent, 6)}%`,
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = "translateY(-6px)";
+                          e.currentTarget.style.transform =
+                            "translateY(-6px)";
                           e.currentTarget.style.boxShadow =
                             "0 20px 45px rgba(0,0,0,0.7)";
                         }}
@@ -84,6 +110,7 @@ export default function Standings() {
                         e.currentTarget.style.boxShadow = "none";
                       }}
                     />
+
                     <span style={barName}>{r.name}</span>
                   </div>
                 );
@@ -92,7 +119,12 @@ export default function Standings() {
           </div>
 
           {/* ================= TABLE ================= */}
-          <div style={tableWrap}>
+          <div
+            style={{
+              ...tableWrap,
+              marginBottom: isMobile ? "40px" : "0",
+            }}
+          >
             <table style={table}>
               <thead>
                 <tr>
@@ -120,19 +152,7 @@ export default function Standings() {
                     <td style={rankCell}>#{i + 1}</td>
 
                     <td style={personCell}>
-                      <img
-                        src={r.img}
-                        style={avatar}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = "scale(1.1)";
-                          e.currentTarget.style.boxShadow =
-                            "0 10px 28px rgba(0,0,0,0.75)";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = "scale(1)";
-                          e.currentTarget.style.boxShadow = "none";
-                        }}
-                      />
+                      <img src={r.img} style={avatar} />
                       <div>
                         <div>{r.name}</div>
                         <div style={sub}>{r.count} Responses</div>
@@ -147,22 +167,16 @@ export default function Standings() {
             </table>
           </div>
 
-          {/* EXTRA SPACE BEFORE FOOTER */}
+          {/* SPACE BEFORE FOOTER */}
           <div style={{ height: "80px" }} />
 
           {/* HOME BUTTON */}
           <a
             href="/"
-            style={homeBtn}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-4px)";
-              e.currentTarget.style.boxShadow =
-                "0 18px 40px rgba(0,0,0,0.75)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow =
-                "0 12px 30px rgba(0,0,0,0.6)";
+            style={{
+              ...homeBtn,
+              bottom: isMobile ? "20px" : homeBtn.bottom,
+              right: isMobile ? "20px" : homeBtn.right,
             }}
           >
             ← Home
@@ -181,7 +195,7 @@ const wrap = {
   maxWidth: "1200px",
   margin: "0 auto",
   position: "relative",
-  paddingTop: "78px", // ✅ HEADER FIX
+  paddingTop: "78px",
 };
 
 const heading = {
@@ -313,7 +327,6 @@ const avatar = {
   height: "42px",
   borderRadius: "50%",
   border: "2px solid #ff3b3b",
-  transition: "all 0.25s ease",
 };
 
 const sub = {

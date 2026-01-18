@@ -2,15 +2,50 @@
 
 import Footer from "@/components/Footer";
 import { auraBackground } from "@/styles/auraBackground";
+import { useEffect, useState } from "react";
 
 export default function HomePage() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   return (
     <>
-      <main style={{ ...auraBackground, flexDirection: "column" }}>
+      <main
+        style={{
+          ...auraBackground,
+          flexDirection: "column",
+          paddingTop: isMobile ? "90px" : "120px", // header offset
+          paddingBottom: "60px",
+        }}
+      >
         {/* HERO */}
-        <div style={hero}>
-          <h1 style={title}>AuraRank</h1>
-          <p style={subtitle}>
+        <div
+          style={{
+            ...hero,
+            marginBottom: isMobile ? "40px" : hero.marginBottom,
+          }}
+        >
+          <h1
+            style={{
+              ...title,
+              fontSize: isMobile ? "34px" : title.fontSize,
+            }}
+          >
+            AuraRank
+          </h1>
+
+          <p
+            style={{
+              ...subtitle,
+              fontSize: isMobile ? "13px" : subtitle.fontSize,
+            }}
+          >
             Algorithm-Driven Aura Ranking System.
           </p>
         </div>
@@ -20,7 +55,11 @@ export default function HomePage() {
           {/* GIVE RATING */}
           <a
             href="/rate"
-            style={card}
+            style={{
+              ...card,
+              width: isMobile ? "92vw" : card.width,
+              maxWidth: "340px",
+            }}
             onMouseEnter={(e) => elevate(e, true)}
             onMouseLeave={(e) => elevate(e, false)}
           >
@@ -33,7 +72,11 @@ export default function HomePage() {
           {/* AURA INDEX */}
           <a
             href="/standings"
-            style={card}
+            style={{
+              ...card,
+              width: isMobile ? "92vw" : card.width,
+              maxWidth: "340px",
+            }}
             onMouseEnter={(e) => elevate(e, true)}
             onMouseLeave={(e) => elevate(e, false)}
           >
@@ -45,10 +88,19 @@ export default function HomePage() {
         </div>
 
         {/* ABOUT */}
-        <div style={aboutRow}>
+        <div
+          style={{
+            ...aboutRow,
+            marginTop: isMobile ? "10px" : "0",
+          }}
+        >
           <a
             href="/about"
-            style={aboutCard}
+            style={{
+              ...aboutCard,
+              width: isMobile ? "92vw" : aboutCard.width,
+              maxWidth: "360px",
+            }}
             onMouseEnter={(e) => elevate(e, true)}
             onMouseLeave={(e) => elevate(e, false)}
           >
@@ -58,6 +110,9 @@ export default function HomePage() {
             </p>
           </a>
         </div>
+
+        {/* SPACE BEFORE FOOTER */}
+        <div style={{ height: "80px" }} />
       </main>
 
       <Footer />
