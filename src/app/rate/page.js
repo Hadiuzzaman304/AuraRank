@@ -72,8 +72,6 @@ export default function RatePage() {
 
   const progressPercent = ((index + 1) / persons.length) * 100;
 
-  /* ================= END SCREEN ================= */
-
   if (!person) {
     return (
       <>
@@ -83,7 +81,6 @@ export default function RatePage() {
             <h2 style={{ marginBottom: "30px" }}>
               Thank you for your response
             </h2>
-
             <a href="/standings" style={endButton}>
               View AuraIndex →
             </a>
@@ -94,8 +91,6 @@ export default function RatePage() {
     );
   }
 
-  /* ================= MAIN UI ================= */
-
   return (
     <>
       <Header />
@@ -104,7 +99,7 @@ export default function RatePage() {
         style={{
           ...auraBackground,
           paddingTop: isMobile ? "140px" : "78px",
-          paddingBottom: isMobile ? "100px" : "0",
+          paddingBottom: isMobile ? "110px" : "0",
         }}
       >
         <div
@@ -116,9 +111,11 @@ export default function RatePage() {
           <div
             style={{
               ...card,
+              /* 🔥 MOBILE ONLY ADJUSTMENTS */
               width: isMobile ? "100%" : "380px",
-              maxWidth: isMobile ? "360px" : "380px",
-              marginTop: isMobile ? "0" : "0",
+              maxWidth: isMobile ? "330px" : "380px",
+              padding: isMobile ? "28px 22px" : card.padding,
+              marginInline: isMobile ? "16px" : "0",
             }}
             onMouseEnter={(e) => !isMobile && elevate(e, true)}
             onMouseLeave={(e) => !isMobile && elevate(e, false)}
@@ -126,7 +123,6 @@ export default function RatePage() {
             {/* PROGRESS */}
             <div style={progressSection}>
               <span style={progressLabel}>Progress</span>
-
               <div style={progressTrack}>
                 <div
                   style={{
@@ -135,7 +131,6 @@ export default function RatePage() {
                   }}
                 />
               </div>
-
               <span style={progressText}>
                 {index + 1} / {persons.length}
               </span>
@@ -148,7 +143,7 @@ export default function RatePage() {
               style={{
                 ...image,
                 width: "100%",
-                maxWidth: "320px",
+                maxWidth: isMobile ? "260px" : "320px",
               }}
             />
 
