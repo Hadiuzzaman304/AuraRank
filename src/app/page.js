@@ -22,30 +22,13 @@ export default function HomePage() {
           flexDirection: "column",
           paddingTop: isMobile ? "96px" : "120px",
           paddingBottom: "60px",
+          overflowX: "hidden", // ✅ HARD STOP horizontal scroll
         }}
       >
         {/* HERO */}
-        <div
-          style={{
-            ...hero,
-            marginBottom: isMobile ? "36px" : hero.marginBottom,
-          }}
-        >
-          <h1
-            style={{
-              ...title,
-              fontSize: isMobile ? "34px" : title.fontSize,
-            }}
-          >
-            AuraRank
-          </h1>
-
-          <p
-            style={{
-              ...subtitle,
-              fontSize: isMobile ? "13px" : subtitle.fontSize,
-            }}
-          >
+        <div style={hero}>
+          <h1 style={title}>AuraRank</h1>
+          <p style={subtitle}>
             Algorithm-Driven Aura Ranking System.
           </p>
         </div>
@@ -54,8 +37,7 @@ export default function HomePage() {
         <div
           style={{
             ...cardRow,
-            flexWrap: "nowrap",
-            gap: isMobile ? "14px" : "30px",
+            flexWrap: isMobile ? "nowrap" : "wrap",
           }}
         >
           {/* GIVE RATING */}
@@ -63,21 +45,12 @@ export default function HomePage() {
             href="/rate"
             style={{
               ...card,
-              width: isMobile ? "44vw" : card.width,
-              maxWidth: isMobile ? "170px" : "300px",
-              padding: isMobile ? "22px" : card.padding,
+              width: isMobile ? "48%" : card.width,
             }}
             onMouseEnter={(e) => !isMobile && elevate(e, true)}
             onMouseLeave={(e) => !isMobile && elevate(e, false)}
           >
-            <h2
-              style={{
-                ...cardTitle,
-                fontSize: isMobile ? "16px" : "22px", // ✅ FIXED
-              }}
-            >
-              🎯 Give Rating
-            </h2>
+            <h2 style={cardTitle}>🎯 Give Rating</h2>
             <p style={cardText}>
               Rate anonymously & contribute to the AuraIndex
             </p>
@@ -88,21 +61,12 @@ export default function HomePage() {
             href="/standings"
             style={{
               ...card,
-              width: isMobile ? "44vw" : card.width,
-              maxWidth: isMobile ? "170px" : "300px",
-              padding: isMobile ? "22px" : card.padding,
+              width: isMobile ? "48%" : card.width,
             }}
             onMouseEnter={(e) => !isMobile && elevate(e, true)}
             onMouseLeave={(e) => !isMobile && elevate(e, false)}
           >
-            <h2
-              style={{
-                ...cardTitle,
-                fontSize: isMobile ? "16px" : "22px", // ✅ FIXED
-              }}
-            >
-              📊 AuraIndex
-            </h2>
+            <h2 style={cardTitle}>📊 AuraIndex</h2>
             <p style={cardText}>
               View live rankings based on community ratings
             </p>
@@ -110,30 +74,17 @@ export default function HomePage() {
         </div>
 
         {/* ABOUT */}
-        <div
-          style={{
-            ...aboutRow,
-            marginTop: isMobile ? "18px" : "0",
-          }}
-        >
+        <div style={aboutRow}>
           <a
             href="/about"
             style={{
               ...aboutCard,
-              width: isMobile ? "92vw" : aboutCard.width,
-              maxWidth: "360px",
+              width: isMobile ? "96%" : aboutCard.width,
             }}
             onMouseEnter={(e) => !isMobile && elevate(e, true)}
             onMouseLeave={(e) => !isMobile && elevate(e, false)}
           >
-            <h2
-              style={{
-                ...cardTitle,
-                fontSize: "22px", // unchanged
-              }}
-            >
-              👤 About Me
-            </h2>
+            <h2 style={cardTitle}>👤 About Me</h2>
             <p style={cardText}>
               Project details & developer information
             </p>
@@ -162,13 +113,13 @@ function elevate(e, up) {
 /* ================= STYLES ================= */
 
 const hero = {
-  marginBottom: "60px",
+  marginBottom: "50px",
   textAlign: "center",
 };
 
 const title = {
   color: "#ff3b3b",
-  fontSize: "44px",
+  fontSize: "44px", // ✅ restored original size
   fontStyle: "italic",
   marginBottom: "8px",
 };
@@ -178,10 +129,13 @@ const subtitle = {
   fontSize: "14px",
 };
 
+/* ----- CARD LAYOUT ----- */
+
 const cardRow = {
   display: "flex",
   justifyContent: "center",
-  marginBottom: "40px",
+  gap: "16px",
+  marginBottom: "30px",
 };
 
 const aboutRow = {
@@ -189,9 +143,11 @@ const aboutRow = {
   justifyContent: "center",
 };
 
+/* ----- CARDS ----- */
+
 const card = {
   width: "300px",
-  padding: "32px",
+  padding: "28px",
   borderRadius: "22px",
   background: "rgba(255,255,255,0.05)",
   backdropFilter: "blur(14px)",
@@ -210,7 +166,7 @@ const aboutCard = {
 const cardTitle = {
   color: "#ffbf69",
   marginBottom: "10px",
-  fontWeight: "600",
+  fontSize: "18px", // ✅ restored
 };
 
 const cardText = {
