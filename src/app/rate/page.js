@@ -29,6 +29,7 @@ export default function RatePage() {
       persons.map((p) => [p.id, { front: 0, left: 0, right: 0, back: 0 }])
     )
   );
+
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -83,7 +84,12 @@ export default function RatePage() {
               Thank you for your response
             </h2>
 
-            <a href="/standings" style={endButton}>
+            <a
+              href="/standings"
+              style={endButton}
+              onMouseEnter={(e) => !isMobile && elevate(e, true)}
+              onMouseLeave={(e) => !isMobile && elevate(e, false)}
+            >
               View AuraIndex →
             </a>
           </div>
@@ -102,14 +108,17 @@ export default function RatePage() {
       <main
         style={{
           ...auraBackground,
-          paddingTop: isMobile ? "110px" : "78px",
+          paddingTop: isMobile ? "110px" : "96px",
+          paddingBottom: "80px",
         }}
       >
-        <div style={pageWrap}>
+        <div style={container}>
           <div
             style={{
               ...card,
-              width: isMobile ? "100%" : card.width,
+              width: isMobile ? "100%" : "380px",
+              maxWidth: isMobile ? "360px" : "380px",
+              padding: isMobile ? "26px 22px" : "40px",
             }}
             onMouseEnter={(e) => !isMobile && elevate(e, true)}
             onMouseLeave={(e) => !isMobile && elevate(e, false)}
@@ -117,6 +126,7 @@ export default function RatePage() {
             {/* PROGRESS */}
             <div style={progressSection}>
               <span style={progressLabel}>Progress</span>
+
               <div style={progressTrack}>
                 <div
                   style={{
@@ -125,26 +135,42 @@ export default function RatePage() {
                   }}
                 />
               </div>
+
               <span style={progressText}>
                 {index + 1} / {persons.length}
               </span>
             </div>
 
-            <h2 style={{ marginBottom: "12px" }}>{person.name}</h2>
+            <h2 style={{ marginBottom: "14px" }}>{person.name}</h2>
 
-            <div style={imageWrap}>
-              <img src={selection.img} style={image} />
-            </div>
+            <img
+              src={selection.img}
+              style={{
+                ...image,
+                width: "100%",
+                maxWidth: "320px",
+              }}
+            />
 
             {/* BUTTONS */}
-            <div style={buttonRow}>
+            <div
+              style={{
+                ...buttonRow,
+                flexWrap: "wrap",
+              }}
+            >
               {[1, 2, 3, 4, 5].map((n) => (
-                <button key={n} onClick={() => rate(n)} style={ratingBtn}>
+                <button
+                  key={n}
+                  onClick={() => rate(n)}
+                  style={ratingBtn}
+                >
                   {n}
                 </button>
               ))}
             </div>
 
+            {/* DEFINING LINE */}
             <div style={defineLine}>
               Define Rank Through Aura. ⭐
             </div>
@@ -170,25 +196,20 @@ function elevate(e, up) {
 
 /* ================= STYLES ================= */
 
-const pageWrap = {
-  width: "100%",
-  maxWidth: "420px",      // 🔑 stops oversized mobile cards
-  margin: "0 auto",
-  padding: "0 16px",      // 🔑 prevents edge touching
+const container = {
   display: "flex",
   justifyContent: "center",
+  alignItems: "center",
 };
 
 const card = {
   background: "rgba(255,255,255,0.05)",
   backdropFilter: "blur(14px)",
   WebkitBackdropFilter: "blur(14px)",
-  padding: "28px",
   borderRadius: "18px",
   color: "#fff",
   textAlign: "center",
   boxShadow: "0 30px 60px rgba(0,0,0,0.6)",
-  width: "380px",
   transition: "all 0.3s ease",
 };
 
@@ -196,7 +217,7 @@ const card = {
 
 const progressSection = {
   textAlign: "left",
-  marginBottom: "18px",
+  marginBottom: "22px",
 };
 
 const progressLabel = {
@@ -218,7 +239,6 @@ const progressTrack = {
 const progressFill = {
   height: "100%",
   background: "linear-gradient(90deg,#ff3b3b,#4b1d6d)",
-  transition: "width 0.4s ease",
 };
 
 const progressText = {
@@ -230,39 +250,31 @@ const progressText = {
 
 /* IMAGE */
 
-const imageWrap = {
-  margin: "14px 0",
-};
-
 const image = {
-  width: "100%",
-  maxWidth: "320px",
   borderRadius: "14px",
   boxShadow: "0 20px 40px rgba(0,0,0,0.6)",
-  display: "block",
-  margin: "0 auto",
+  marginBottom: "16px",
 };
 
 /* BUTTONS */
 
 const buttonRow = {
-  marginTop: "22px",
+  marginTop: "20px",
   display: "flex",
   justifyContent: "center",
-  gap: "12px",
-  flexWrap: "wrap",
+  gap: "14px",
 };
 
 const ratingBtn = {
-  width: "52px",
-  height: "52px",
+  width: "54px",
+  height: "54px",
   borderRadius: "50%",
   border: "1px solid rgba(255,255,255,0.25)",
   background: "rgba(255,255,255,0.08)",
   backdropFilter: "blur(14px)",
   WebkitBackdropFilter: "blur(14px)",
   color: "#ffbf69",
-  fontSize: "18px",
+  fontSize: "20px",
   fontWeight: "700",
   cursor: "pointer",
 };
