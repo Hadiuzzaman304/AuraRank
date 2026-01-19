@@ -9,8 +9,6 @@ import { auraBackground } from "@/styles/auraBackground";
 
 const STORAGE_KEY = "aurarank-global";
 
-/* ================= INIT ================= */
-
 function getInitialData() {
   if (typeof window === "undefined") return {};
   const saved = localStorage.getItem(STORAGE_KEY);
@@ -23,8 +21,6 @@ function getInitialData() {
   return init;
 }
 
-/* ================= PAGE ================= */
-
 export default function RatePage() {
   const [index, setIndex] = useState(0);
   const [globalData, setGlobalData] = useState(getInitialData);
@@ -33,7 +29,6 @@ export default function RatePage() {
       persons.map((p) => [p.id, { front: 0, left: 0, right: 0, back: 0 }])
     )
   );
-
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -82,18 +77,13 @@ export default function RatePage() {
     return (
       <>
         <Header />
-        <main style={{ ...auraBackground, paddingTop: "120px" }}>
+        <main style={{ ...auraBackground, paddingTop: "96px" }}>
           <div style={endStyle}>
             <h2 style={{ marginBottom: "30px" }}>
               Thank you for your response
             </h2>
 
-            <a
-              href="/standings"
-              style={endButton}
-              onMouseEnter={(e) => !isMobile && elevate(e, true)}
-              onMouseLeave={(e) => !isMobile && elevate(e, false)}
-            >
+            <a href="/standings" style={endButton}>
               View AuraIndex →
             </a>
           </div>
@@ -103,7 +93,7 @@ export default function RatePage() {
     );
   }
 
-  /* ================= MAIN ================= */
+  /* ================= MAIN UI ================= */
 
   return (
     <>
@@ -112,21 +102,14 @@ export default function RatePage() {
       <main
         style={{
           ...auraBackground,
-          paddingTop: isMobile ? "140px" : "120px",
-          paddingBottom: "80px",
+          paddingTop: isMobile ? "110px" : "78px",
         }}
       >
-        <div
-          style={{
-            ...container,
-            alignItems: isMobile ? "flex-start" : "center",
-          }}
-        >
+        <div style={pageWrap}>
           <div
             style={{
               ...card,
-              width: isMobile ? "92vw" : card.width,
-              padding: isMobile ? "26px 22px" : card.padding,
+              width: isMobile ? "100%" : card.width,
             }}
             onMouseEnter={(e) => !isMobile && elevate(e, true)}
             onMouseLeave={(e) => !isMobile && elevate(e, false)}
@@ -134,7 +117,6 @@ export default function RatePage() {
             {/* PROGRESS */}
             <div style={progressSection}>
               <span style={progressLabel}>Progress</span>
-
               <div style={progressTrack}>
                 <div
                   style={{
@@ -143,23 +125,16 @@ export default function RatePage() {
                   }}
                 />
               </div>
-
               <span style={progressText}>
                 {index + 1} / {persons.length}
               </span>
             </div>
 
-            <h2 style={{ marginBottom: "14px" }}>{person.name}</h2>
+            <h2 style={{ marginBottom: "12px" }}>{person.name}</h2>
 
-            <img
-              src={selection.img}
-              style={{
-                ...image,
-                width: "100%",
-                maxWidth: "320px",
-                margin: "0 auto",
-              }}
-            />
+            <div style={imageWrap}>
+              <img src={selection.img} style={image} />
+            </div>
 
             {/* BUTTONS */}
             <div style={buttonRow}>
@@ -195,8 +170,11 @@ function elevate(e, up) {
 
 /* ================= STYLES ================= */
 
-const container = {
-  minHeight: "calc(100vh - 160px)",
+const pageWrap = {
+  width: "100%",
+  maxWidth: "420px",      // 🔑 stops oversized mobile cards
+  margin: "0 auto",
+  padding: "0 16px",      // 🔑 prevents edge touching
   display: "flex",
   justifyContent: "center",
 };
@@ -205,8 +183,8 @@ const card = {
   background: "rgba(255,255,255,0.05)",
   backdropFilter: "blur(14px)",
   WebkitBackdropFilter: "blur(14px)",
-  padding: "40px",
-  borderRadius: "20px",
+  padding: "28px",
+  borderRadius: "18px",
   color: "#fff",
   textAlign: "center",
   boxShadow: "0 30px 60px rgba(0,0,0,0.6)",
@@ -218,14 +196,14 @@ const card = {
 
 const progressSection = {
   textAlign: "left",
-  marginBottom: "22px",
+  marginBottom: "18px",
 };
 
 const progressLabel = {
   fontSize: "13px",
   fontStyle: "italic",
   color: "#ff9a9a",
-  marginBottom: "12px",
+  marginBottom: "10px",
   display: "block",
 };
 
@@ -247,38 +225,44 @@ const progressText = {
   marginTop: "6px",
   fontSize: "12px",
   opacity: 0.8,
-  display: "block",
   textAlign: "center",
 };
 
 /* IMAGE */
 
+const imageWrap = {
+  margin: "14px 0",
+};
+
 const image = {
+  width: "100%",
+  maxWidth: "320px",
   borderRadius: "14px",
   boxShadow: "0 20px 40px rgba(0,0,0,0.6)",
-  transition: "all 0.35s ease",
+  display: "block",
+  margin: "0 auto",
 };
 
 /* BUTTONS */
 
 const buttonRow = {
-  marginTop: "26px",
+  marginTop: "22px",
   display: "flex",
   justifyContent: "center",
+  gap: "12px",
   flexWrap: "wrap",
-  gap: "14px",
 };
 
 const ratingBtn = {
-  width: "54px",
-  height: "54px",
+  width: "52px",
+  height: "52px",
   borderRadius: "50%",
   border: "1px solid rgba(255,255,255,0.25)",
   background: "rgba(255,255,255,0.08)",
   backdropFilter: "blur(14px)",
   WebkitBackdropFilter: "blur(14px)",
   color: "#ffbf69",
-  fontSize: "20px",
+  fontSize: "18px",
   fontWeight: "700",
   cursor: "pointer",
 };
@@ -287,12 +271,12 @@ const ratingBtn = {
 
 const defineLine = {
   marginTop: "18px",
-  fontSize: "15px",
+  fontSize: "14px",
   fontStyle: "italic",
   color: "#d1a3ff",
 };
 
-/* END */
+/* END SCREEN */
 
 const endStyle = {
   minHeight: "calc(100vh - 120px)",
@@ -310,5 +294,4 @@ const endButton = {
   textDecoration: "none",
   fontWeight: "600",
   boxShadow: "0 12px 30px rgba(0,0,0,0.5)",
-  transition: "all 0.3s ease",
 };
