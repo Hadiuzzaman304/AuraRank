@@ -98,7 +98,7 @@ export default function RatePage() {
       <main
         style={{
           ...auraBackground,
-          paddingTop: isMobile ? "210px" : "78px",
+          paddingTop: isMobile ? "400px" : "78px",
           paddingBottom: isMobile ? "110px" : "0",
         }}
       >
