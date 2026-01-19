@@ -2,36 +2,29 @@
 
 import Footer from "@/components/Footer";
 import { auraBackground } from "@/styles/auraBackground";
+import { useEffect, useState } from "react";
 
 export default function HomePage() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   return (
     <>
       <main
         style={{
           ...auraBackground,
-
-          /* 🔥 KEY FIX */
-          minHeight: "100vh",
-          paddingTop: "78px",           // header height
-          boxSizing: "border-box",
-
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
+          paddingTop: isMobile ? "88px" : "120px", // ✅ header height only
+          paddingBottom: "80px",
         }}
       >
         {/* CENTER WRAPPER */}
-        <div
-          style={{
-            width: "100%",
-            maxWidth: "900px",
-            padding: "0 16px",
-
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
+        <div style={pageWrap}>
           {/* HERO */}
           <div style={hero}>
             <h1 style={title}>AuraRank</h1>
@@ -58,8 +51,8 @@ export default function HomePage() {
           </div>
 
           {/* DEVELOPER */}
-          <div style={aboutRow}>
-            <a href="/about" style={aboutCard}>
+          <div style={developerRow}>
+            <a href="/about" style={developerCard}>
               <h2 style={cardTitle}>👨‍💻 Developer</h2>
               <p style={cardText}>
                 Project details & developer information
@@ -76,16 +69,24 @@ export default function HomePage() {
 
 /* ================= STYLES ================= */
 
+const pageWrap = {
+  width: "100%",
+  maxWidth: "1100px",
+  margin: "0 auto",
+  padding: "0 18px", // ✅ prevents edge touching on mobile
+  boxSizing: "border-box",
+};
+
 const hero = {
-  marginBottom: "48px",
   textAlign: "center",
+  marginBottom: "56px",
 };
 
 const title = {
   color: "#ff3b3b",
   fontSize: "44px",
   fontStyle: "italic",
-  marginBottom: "6px",
+  marginBottom: "8px",
 };
 
 const subtitle = {
@@ -93,17 +94,17 @@ const subtitle = {
   fontSize: "14px",
 };
 
-/* ----- LAYOUT ----- */
+/* ----- CARD LAYOUT ----- */
 
 const cardRow = {
   display: "flex",
   justifyContent: "center",
-  gap: "28px",
+  gap: "30px",
   flexWrap: "wrap",
   marginBottom: "36px",
 };
 
-const aboutRow = {
+const developerRow = {
   display: "flex",
   justifyContent: "center",
 };
@@ -122,7 +123,7 @@ const card = {
   boxShadow: "0 20px 50px rgba(0,0,0,0.6)",
 };
 
-const aboutCard = {
+const developerCard = {
   ...card,
   width: "340px",
 };
@@ -130,7 +131,7 @@ const aboutCard = {
 const cardTitle = {
   color: "#ffbf69",
   marginBottom: "10px",
-  fontSize: "20px",
+  fontSize: "18px", // ✅ restored size
 };
 
 const cardText = {
