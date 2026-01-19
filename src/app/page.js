@@ -19,47 +19,92 @@ export default function HomePage() {
       <main
         style={{
           ...auraBackground,
-          paddingTop: isMobile ? "88px" : "120px", // ✅ header height only
-          paddingBottom: "80px",
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          paddingTop: isMobile ? "90px" : "120px",
+          paddingBottom: "60px",
         }}
       >
-        {/* CENTER WRAPPER */}
-        <div style={pageWrap}>
-          {/* HERO */}
-          <div style={hero}>
-            <h1 style={title}>AuraRank</h1>
-            <p style={subtitle}>
-              Algorithm-Driven Aura Ranking System.
-            </p>
-          </div>
+        {/* HERO */}
+        <div style={hero}>
+          <h1
+            style={{
+              ...title,
+              fontSize: isMobile ? "34px" : title.fontSize,
+            }}
+          >
+            AuraRank
+          </h1>
 
-          {/* TOP CARDS */}
-          <div style={cardRow}>
-            <a href="/rate" style={card}>
-              <h2 style={cardTitle}>🎯 Give Rating</h2>
-              <p style={cardText}>
-                Rate anonymously & contribute to the AuraIndex
-              </p>
-            </a>
-
-            <a href="/standings" style={card}>
-              <h2 style={cardTitle}>📊 AuraIndex</h2>
-              <p style={cardText}>
-                View live rankings based on community ratings
-              </p>
-            </a>
-          </div>
-
-          {/* DEVELOPER */}
-          <div style={developerRow}>
-            <a href="/about" style={developerCard}>
-              <h2 style={cardTitle}>👨‍💻 Developer</h2>
-              <p style={cardText}>
-                Project details & developer information
-              </p>
-            </a>
-          </div>
+          <p
+            style={{
+              ...subtitle,
+              fontSize: isMobile ? "13px" : subtitle.fontSize,
+            }}
+          >
+            Algorithm-Driven Aura Ranking System.
+          </p>
         </div>
+
+        {/* OPTIONS */}
+        <div style={cardRow}>
+          {/* GIVE RATING */}
+          <a
+            href="/rate"
+            style={{
+              ...card,
+              width: isMobile ? "44vw" : card.width,
+              minWidth: isMobile ? "160px" : "auto",
+            }}
+            onMouseEnter={(e) => !isMobile && elevate(e, true)}
+            onMouseLeave={(e) => !isMobile && elevate(e, false)}
+          >
+            <h2 style={cardTitle}>🎯 Give Rating</h2>
+            <p style={cardText}>
+              Rate anonymously & contribute to the AuraIndex
+            </p>
+          </a>
+
+          {/* AURA INDEX */}
+          <a
+            href="/standings"
+            style={{
+              ...card,
+              width: isMobile ? "44vw" : card.width,
+              minWidth: isMobile ? "160px" : "auto",
+            }}
+            onMouseEnter={(e) => !isMobile && elevate(e, true)}
+            onMouseLeave={(e) => !isMobile && elevate(e, false)}
+          >
+            <h2 style={cardTitle}>📊 AuraIndex</h2>
+            <p style={cardText}>
+              View live rankings based on community ratings
+            </p>
+          </a>
+        </div>
+
+        {/* DEVELOPER */}
+        <div style={aboutRow}>
+          <a
+            href="/about"
+            style={{
+              ...aboutCard,
+              width: isMobile ? "90vw" : aboutCard.width,
+            }}
+            onMouseEnter={(e) => !isMobile && elevate(e, true)}
+            onMouseLeave={(e) => !isMobile && elevate(e, false)}
+          >
+            <h2 style={cardTitle}>👨‍💻 Developer</h2>
+            <p style={cardText}>
+              Project details & developer information
+            </p>
+          </a>
+        </div>
+
+        <div style={{ height: "80px" }} />
       </main>
 
       <Footer />
@@ -67,19 +112,24 @@ export default function HomePage() {
   );
 }
 
-/* ================= STYLES ================= */
+/* ================= HELPERS ================= */
 
-const pageWrap = {
-  width: "100%",
-  maxWidth: "1100px",
-  margin: "0 auto",
-  padding: "0 18px", // ✅ prevents edge touching on mobile
-  boxSizing: "border-box",
-};
+function elevate(e, up) {
+  e.currentTarget.style.transform = up
+    ? "translateY(-6px)"
+    : "translateY(0)";
+  e.currentTarget.style.boxShadow = up
+    ? "0 30px 70px rgba(0,0,0,0.85)"
+    : "0 20px 50px rgba(0,0,0,0.6)";
+}
+
+/* ================= STYLES ================= */
 
 const hero = {
   textAlign: "center",
-  marginBottom: "56px",
+  marginBottom: "42px",
+  marginTop: "-140px",        // ✅ reduced top gap
+  pointerEvents: "none",      // ✅ prevents hover blocking
 };
 
 const title = {
@@ -99,12 +149,13 @@ const subtitle = {
 const cardRow = {
   display: "flex",
   justifyContent: "center",
-  gap: "30px",
-  flexWrap: "wrap",
-  marginBottom: "36px",
+  alignItems: "stretch",
+  gap: "24px",
+  flexWrap: "nowrap",        // ✅ keeps desktop layout
+  marginBottom: "28px",
 };
 
-const developerRow = {
+const aboutRow = {
   display: "flex",
   justifyContent: "center",
 };
@@ -120,18 +171,21 @@ const card = {
   WebkitBackdropFilter: "blur(14px)",
   textDecoration: "none",
   color: "#fff",
+  transition: "all 0.3s ease",
   boxShadow: "0 20px 50px rgba(0,0,0,0.6)",
+  position: "relative",
+  zIndex: 2,
 };
 
-const developerCard = {
+const aboutCard = {
   ...card,
   width: "340px",
 };
 
 const cardTitle = {
   color: "#ffbf69",
+  fontSize: "20px",          // ✅ restored size
   marginBottom: "10px",
-  fontSize: "18px", // ✅ restored size
 };
 
 const cardText = {
