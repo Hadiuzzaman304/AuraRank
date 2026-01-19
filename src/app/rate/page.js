@@ -78,7 +78,12 @@ export default function RatePage() {
     return (
       <>
         <Header />
-        <main style={{ ...auraBackground, paddingTop: "96px" }}>
+        <main
+          style={{
+            ...auraBackground,
+            paddingTop: isMobile ? "140px" : "78px",
+          }}
+        >
           <div style={endStyle}>
             <h2 style={{ marginBottom: "30px" }}>
               Thank you for your response
@@ -108,8 +113,9 @@ export default function RatePage() {
       <main
         style={{
           ...auraBackground,
-          paddingTop: isMobile ? "110px" : "96px",
-          paddingBottom: "80px",
+          paddingTop: isMobile ? "140px" : "78px", // ✅ FIXED
+          paddingLeft: isMobile ? "12px" : "0",   // ✅ SAFE EDGE
+          paddingRight: isMobile ? "12px" : "0",  // ✅ SAFE EDGE
         }}
       >
         <div style={container}>
@@ -118,7 +124,7 @@ export default function RatePage() {
               ...card,
               width: isMobile ? "100%" : "380px",
               maxWidth: isMobile ? "360px" : "380px",
-              padding: isMobile ? "26px 22px" : "40px",
+              padding: isMobile ? "26px" : card.padding,
             }}
             onMouseEnter={(e) => !isMobile && elevate(e, true)}
             onMouseLeave={(e) => !isMobile && elevate(e, false)}
@@ -141,7 +147,7 @@ export default function RatePage() {
               </span>
             </div>
 
-            <h2 style={{ marginBottom: "14px" }}>{person.name}</h2>
+            <h2 style={{ marginBottom: "12px" }}>{person.name}</h2>
 
             <img
               src={selection.img}
@@ -153,24 +159,14 @@ export default function RatePage() {
             />
 
             {/* BUTTONS */}
-            <div
-              style={{
-                ...buttonRow,
-                flexWrap: "wrap",
-              }}
-            >
+            <div style={buttonRow}>
               {[1, 2, 3, 4, 5].map((n) => (
-                <button
-                  key={n}
-                  onClick={() => rate(n)}
-                  style={ratingBtn}
-                >
+                <button key={n} onClick={() => rate(n)} style={ratingBtn}>
                   {n}
                 </button>
               ))}
             </div>
 
-            {/* DEFINING LINE */}
             <div style={defineLine}>
               Define Rank Through Aura. ⭐
             </div>
@@ -197,6 +193,7 @@ function elevate(e, up) {
 /* ================= STYLES ================= */
 
 const container = {
+  minHeight: "calc(100vh - 160px)",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
@@ -206,6 +203,7 @@ const card = {
   background: "rgba(255,255,255,0.05)",
   backdropFilter: "blur(14px)",
   WebkitBackdropFilter: "blur(14px)",
+  padding: "40px",
   borderRadius: "18px",
   color: "#fff",
   textAlign: "center",
@@ -224,7 +222,7 @@ const progressLabel = {
   fontSize: "13px",
   fontStyle: "italic",
   color: "#ff9a9a",
-  marginBottom: "10px",
+  marginBottom: "12px",
   display: "block",
 };
 
@@ -239,12 +237,14 @@ const progressTrack = {
 const progressFill = {
   height: "100%",
   background: "linear-gradient(90deg,#ff3b3b,#4b1d6d)",
+  transition: "width 0.4s ease",
 };
 
 const progressText = {
   marginTop: "6px",
   fontSize: "12px",
   opacity: 0.8,
+  display: "block",
   textAlign: "center",
 };
 
@@ -253,16 +253,16 @@ const progressText = {
 const image = {
   borderRadius: "14px",
   boxShadow: "0 20px 40px rgba(0,0,0,0.6)",
-  marginBottom: "16px",
 };
 
 /* BUTTONS */
 
 const buttonRow = {
-  marginTop: "20px",
+  marginTop: "26px",
   display: "flex",
   justifyContent: "center",
   gap: "14px",
+  flexWrap: "wrap",
 };
 
 const ratingBtn = {
@@ -282,8 +282,8 @@ const ratingBtn = {
 /* DEFINING LINE */
 
 const defineLine = {
-  marginTop: "18px",
-  fontSize: "14px",
+  marginTop: "20px",
+  fontSize: "15px",
   fontStyle: "italic",
   color: "#d1a3ff",
 };
@@ -291,7 +291,7 @@ const defineLine = {
 /* END SCREEN */
 
 const endStyle = {
-  minHeight: "calc(100vh - 120px)",
+  minHeight: "calc(100vh - 160px)",
   display: "flex",
   flexDirection: "column",
   justifyContent: "center",
@@ -306,4 +306,5 @@ const endButton = {
   textDecoration: "none",
   fontWeight: "600",
   boxShadow: "0 12px 30px rgba(0,0,0,0.5)",
+  transition: "all 0.3s ease",
 };
