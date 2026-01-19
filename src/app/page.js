@@ -51,19 +51,33 @@ export default function HomePage() {
         </div>
 
         {/* MAIN OPTIONS */}
-        <div style={cardRow}>
+        <div
+          style={{
+            ...cardRow,
+            flexWrap: "nowrap",
+            gap: isMobile ? "14px" : "30px",
+          }}
+        >
           {/* GIVE RATING */}
           <a
             href="/rate"
             style={{
               ...card,
-              width: isMobile ? "92vw" : card.width,
-              maxWidth: "340px",
+              width: isMobile ? "44vw" : card.width,
+              maxWidth: isMobile ? "170px" : "300px",
+              padding: isMobile ? "22px" : card.padding,
             }}
             onMouseEnter={(e) => !isMobile && elevate(e, true)}
             onMouseLeave={(e) => !isMobile && elevate(e, false)}
           >
-            <h2 style={cardTitle}>Give Rating</h2>
+            <h2
+              style={{
+                ...cardTitle,
+                fontSize: isMobile ? "16px" : "22px", // ✅ FIXED
+              }}
+            >
+              🎯 Give Rating
+            </h2>
             <p style={cardText}>
               Rate anonymously & contribute to the AuraIndex
             </p>
@@ -74,13 +88,21 @@ export default function HomePage() {
             href="/standings"
             style={{
               ...card,
-              width: isMobile ? "92vw" : card.width,
-              maxWidth: "340px",
+              width: isMobile ? "44vw" : card.width,
+              maxWidth: isMobile ? "170px" : "300px",
+              padding: isMobile ? "22px" : card.padding,
             }}
             onMouseEnter={(e) => !isMobile && elevate(e, true)}
             onMouseLeave={(e) => !isMobile && elevate(e, false)}
           >
-            <h2 style={cardTitle}>AuraIndex</h2>
+            <h2
+              style={{
+                ...cardTitle,
+                fontSize: isMobile ? "16px" : "22px", // ✅ FIXED
+              }}
+            >
+              📊 AuraIndex
+            </h2>
             <p style={cardText}>
               View live rankings based on community ratings
             </p>
@@ -91,7 +113,7 @@ export default function HomePage() {
         <div
           style={{
             ...aboutRow,
-            marginTop: isMobile ? "6px" : "0",
+            marginTop: isMobile ? "18px" : "0",
           }}
         >
           <a
@@ -104,14 +126,20 @@ export default function HomePage() {
             onMouseEnter={(e) => !isMobile && elevate(e, true)}
             onMouseLeave={(e) => !isMobile && elevate(e, false)}
           >
-            <h2 style={cardTitle}>About Me</h2>
+            <h2
+              style={{
+                ...cardTitle,
+                fontSize: "22px", // unchanged
+              }}
+            >
+              👤 About Me
+            </h2>
             <p style={cardText}>
               Project details & developer information
             </p>
           </a>
         </div>
 
-        {/* SPACE BEFORE FOOTER */}
         <div style={{ height: "80px" }} />
       </main>
 
@@ -150,13 +178,9 @@ const subtitle = {
   fontSize: "14px",
 };
 
-/* ----- CARD LAYOUT ----- */
-
 const cardRow = {
   display: "flex",
   justifyContent: "center",
-  gap: "30px",
-  flexWrap: "wrap",
   marginBottom: "40px",
 };
 
@@ -164,8 +188,6 @@ const aboutRow = {
   display: "flex",
   justifyContent: "center",
 };
-
-/* ----- CARDS ----- */
 
 const card = {
   width: "300px",
@@ -188,6 +210,7 @@ const aboutCard = {
 const cardTitle = {
   color: "#ffbf69",
   marginBottom: "10px",
+  fontWeight: "600",
 };
 
 const cardText = {
