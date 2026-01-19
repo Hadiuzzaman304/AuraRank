@@ -78,23 +78,13 @@ export default function RatePage() {
     return (
       <>
         <Header />
-        <main
-          style={{
-            ...auraBackground,
-            paddingTop: isMobile ? "140px" : "78px",
-          }}
-        >
+        <main style={{ ...auraBackground, paddingTop: "140px" }}>
           <div style={endStyle}>
             <h2 style={{ marginBottom: "30px" }}>
               Thank you for your response
             </h2>
 
-            <a
-              href="/standings"
-              style={endButton}
-              onMouseEnter={(e) => !isMobile && elevate(e, true)}
-              onMouseLeave={(e) => !isMobile && elevate(e, false)}
-            >
+            <a href="/standings" style={endButton}>
               View AuraIndex →
             </a>
           </div>
@@ -113,18 +103,22 @@ export default function RatePage() {
       <main
         style={{
           ...auraBackground,
-          paddingTop: isMobile ? "140px" : "78px", // ✅ FIXED
-          paddingLeft: isMobile ? "12px" : "0",   // ✅ SAFE EDGE
-          paddingRight: isMobile ? "12px" : "0",  // ✅ SAFE EDGE
+          paddingTop: isMobile ? "140px" : "78px",
+          paddingBottom: isMobile ? "100px" : "0",
         }}
       >
-        <div style={container}>
+        <div
+          style={{
+            ...container,
+            alignItems: isMobile ? "flex-start" : "center",
+          }}
+        >
           <div
             style={{
               ...card,
               width: isMobile ? "100%" : "380px",
               maxWidth: isMobile ? "360px" : "380px",
-              padding: isMobile ? "26px" : card.padding,
+              marginTop: isMobile ? "0" : "0",
             }}
             onMouseEnter={(e) => !isMobile && elevate(e, true)}
             onMouseLeave={(e) => !isMobile && elevate(e, false)}
@@ -158,7 +152,6 @@ export default function RatePage() {
               }}
             />
 
-            {/* BUTTONS */}
             <div style={buttonRow}>
               {[1, 2, 3, 4, 5].map((n) => (
                 <button key={n} onClick={() => rate(n)} style={ratingBtn}>
@@ -193,10 +186,9 @@ function elevate(e, up) {
 /* ================= STYLES ================= */
 
 const container = {
-  minHeight: "calc(100vh - 160px)",
+  minHeight: "calc(100vh - 140px)",
   display: "flex",
   justifyContent: "center",
-  alignItems: "center",
 };
 
 const card = {
@@ -210,8 +202,6 @@ const card = {
   boxShadow: "0 30px 60px rgba(0,0,0,0.6)",
   transition: "all 0.3s ease",
 };
-
-/* PROGRESS */
 
 const progressSection = {
   textAlign: "left",
@@ -248,14 +238,10 @@ const progressText = {
   textAlign: "center",
 };
 
-/* IMAGE */
-
 const image = {
   borderRadius: "14px",
   boxShadow: "0 20px 40px rgba(0,0,0,0.6)",
 };
-
-/* BUTTONS */
 
 const buttonRow = {
   marginTop: "26px",
@@ -279,8 +265,6 @@ const ratingBtn = {
   cursor: "pointer",
 };
 
-/* DEFINING LINE */
-
 const defineLine = {
   marginTop: "20px",
   fontSize: "15px",
@@ -288,10 +272,8 @@ const defineLine = {
   color: "#d1a3ff",
 };
 
-/* END SCREEN */
-
 const endStyle = {
-  minHeight: "calc(100vh - 160px)",
+  minHeight: "calc(100vh - 140px)",
   display: "flex",
   flexDirection: "column",
   justifyContent: "center",
