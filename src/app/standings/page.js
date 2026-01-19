@@ -49,28 +49,33 @@ export default function Standings() {
       <main
         style={{
           ...auraBackground,
-          overflowX: "hidden", // ✅ prevents page-level white strip
+          overflowX: "hidden", // stop white strip
         }}
       >
         <div
           style={{
             ...wrap,
             paddingTop: "78px",
-            paddingLeft: isMobile ? "14px" : "0",
-            paddingRight: isMobile ? "14px" : "0",
+            paddingLeft: isMobile ? "16px" : "0",
+            paddingRight: isMobile ? "16px" : "0",
           }}
         >
           <h1 style={heading}>AuraIndex</h1>
 
           {/* ================= BAR GRAPH ================= */}
-          <div style={chartBox}>
+          <div
+            style={{
+              ...chartBox,
+              padding: isMobile ? "18px 14px" : chartBox.padding,
+            }}
+          >
             <h3 style={chartTitle}>Average Rating Distribution</h3>
 
             <div
               style={{
                 ...chart,
                 overflowX: isMobile ? "auto" : "visible",
-                paddingBottom: isMobile ? "12px" : "0",
+                paddingBottom: isMobile ? "14px" : "0",
               }}
             >
               {rows.map((r) => {
@@ -81,17 +86,26 @@ export default function Standings() {
                     key={r.id}
                     style={{
                       ...barItem,
-                      minWidth: isMobile ? "70px" : "auto",
+                      minWidth: isMobile ? "68px" : "auto",
                     }}
                   >
                     <div style={barContainer}>
                       <div
                         style={{
                           ...bar,
-                          height: `${Math.max(heightPercent, 6)}%`,
+                          height: `${Math.max(heightPercent, 8)}%`,
+                          paddingTop: isMobile ? "6px" : "0",
                         }}
                       >
-                        <span style={barValue}>{r.avg}</span>
+                        <span
+                          style={{
+                            ...barValue,
+                            position: isMobile ? "static" : "absolute",
+                            fontSize: isMobile ? "11px" : barValue.fontSize,
+                          }}
+                        >
+                          {r.avg}
+                        </span>
                       </div>
                     </div>
 
@@ -108,6 +122,8 @@ export default function Standings() {
             style={{
               ...tableWrap,
               marginBottom: isMobile ? "50px" : "0",
+              paddingLeft: isMobile ? "4px" : "0",
+              paddingRight: isMobile ? "4px" : "0",
               overflowX: "auto",
               WebkitOverflowScrolling: "touch",
             }}
@@ -229,11 +245,9 @@ const bar = {
 };
 
 const barValue = {
-  position: "absolute",
   top: "-22px",
   width: "100%",
   textAlign: "center",
-  fontSize: "12px",
   fontWeight: "700",
   color: "#ffbf69",
 };
