@@ -108,9 +108,12 @@ function elevate(e, up) {
 /* ================= STYLES ================= */
 
 const hero = {
-  marginBottom: "48px",
   textAlign: "center",
+  marginBottom: "48px",
+  marginTop: "-130px",
+  pointerEvents: "none", // 🔥 IMPORTANT
 };
+
 
 const title = {
   color: "#ff3b3b",
