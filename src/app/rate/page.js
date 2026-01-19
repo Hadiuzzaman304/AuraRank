@@ -99,7 +99,7 @@ export default function RatePage() {
         style={{
           ...auraBackground,
           paddingTop: isMobile ? "400px" : "78px",
-          paddingBottom: isMobile ? "110px" : "0",
+          paddingBottom: isMobile ? "90px" : "0",
         }}
       >
         <div
@@ -114,7 +114,7 @@ export default function RatePage() {
               /* 🔥 MOBILE ONLY ADJUSTMENTS */
               width: isMobile ? "100%" : "380px",
               maxWidth: isMobile ? "330px" : "380px",
-              padding: isMobile ? "55px 42px" : card.padding,
+              padding: isMobile ? "28px 22px" : card.padding,
               marginInline: isMobile ? "16px" : "0",
             }}
             onMouseEnter={(e) => !isMobile && elevate(e, true)}
