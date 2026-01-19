@@ -87,16 +87,8 @@ export default function RatePage() {
             <a
               href="/standings"
               style={endButton}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow =
-                  "0 0 26px rgba(255,59,59,0.75)";
-                e.currentTarget.style.transform = "translateY(-2px)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow =
-                  "0 12px 30px rgba(0,0,0,0.5)";
-                e.currentTarget.style.transform = "translateY(0)";
-              }}
+              onMouseEnter={(e) => !isMobile && elevate(e, true)}
+              onMouseLeave={(e) => !isMobile && elevate(e, false)}
             >
               View AuraIndex →
             </a>
@@ -121,14 +113,8 @@ export default function RatePage() {
               width: isMobile ? "92vw" : card.width,
               padding: isMobile ? "26px" : card.padding,
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow =
-                "0 40px 90px rgba(0,0,0,0.85)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow =
-                "0 30px 60px rgba(0,0,0,0.6)";
-            }}
+            onMouseEnter={(e) => !isMobile && elevate(e, true)}
+            onMouseLeave={(e) => !isMobile && elevate(e, false)}
           >
             {/* PROGRESS */}
             <div style={progressSection}>
@@ -190,6 +176,17 @@ export default function RatePage() {
   );
 }
 
+/* ================= HELPERS ================= */
+
+function elevate(e, up) {
+  e.currentTarget.style.transform = up
+    ? "translateY(-6px)"
+    : "translateY(0)";
+  e.currentTarget.style.boxShadow = up
+    ? "0 40px 90px rgba(0,0,0,0.85)"
+    : "0 30px 60px rgba(0,0,0,0.6)";
+}
+
 /* ================= STYLES ================= */
 
 const container = {
@@ -202,6 +199,7 @@ const container = {
 const card = {
   background: "rgba(255,255,255,0.05)",
   backdropFilter: "blur(14px)",
+  WebkitBackdropFilter: "blur(14px)",
   padding: "40px",
   borderRadius: "18px",
   color: "#fff",
@@ -273,6 +271,7 @@ const ratingBtn = {
   border: "1px solid rgba(255,255,255,0.25)",
   background: "rgba(255,255,255,0.08)",
   backdropFilter: "blur(14px)",
+  WebkitBackdropFilter: "blur(14px)",
   color: "#ffbf69",
   fontSize: "20px",
   fontWeight: "700",

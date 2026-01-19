@@ -32,16 +32,8 @@ export default function About() {
               width: isMobile ? "92vw" : card.width,
               padding: isMobile ? "28px 22px" : card.padding,
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-6px)";
-              e.currentTarget.style.boxShadow =
-                "0 30px 70px rgba(0,0,0,0.8)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow =
-                "0 20px 50px rgba(0,0,0,0.6)";
-            }}
+            onMouseEnter={(e) => !isMobile && elevate(e, true)}
+            onMouseLeave={(e) => !isMobile && elevate(e, false)}
           >
             {/* IMAGE */}
             <div style={imgWrap}>
@@ -103,6 +95,17 @@ export default function About() {
       <Footer />
     </>
   );
+}
+
+/* ================= HELPERS ================= */
+
+function elevate(e, up) {
+  e.currentTarget.style.transform = up
+    ? "translateY(-6px)"
+    : "translateY(0)";
+  e.currentTarget.style.boxShadow = up
+    ? "0 30px 70px rgba(0,0,0,0.8)"
+    : "0 20px 50px rgba(0,0,0,0.6)";
 }
 
 /* ================= SMALL COMPONENT ================= */

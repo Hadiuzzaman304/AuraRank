@@ -45,6 +45,7 @@ export default function Standings() {
   return (
     <>
       <Header />
+
       <main style={auraBackground}>
         <div
           style={{
@@ -82,16 +83,12 @@ export default function Standings() {
                           ...bar,
                           height: `${Math.max(heightPercent, 6)}%`,
                         }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform =
-                            "translateY(-6px)";
-                          e.currentTarget.style.boxShadow =
-                            "0 20px 45px rgba(0,0,0,0.7)";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = "translateY(0)";
-                          e.currentTarget.style.boxShadow = "none";
-                        }}
+                        onMouseEnter={(e) =>
+                          !isMobile && elevate(e, true)
+                        }
+                        onMouseLeave={(e) =>
+                          !isMobile && elevate(e, false)
+                        }
                       >
                         <span style={barValue}>{r.avg}</span>
                       </div>
@@ -100,15 +97,12 @@ export default function Standings() {
                     <img
                       src={r.img}
                       style={barAvatar}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = "scale(1.08)";
-                        e.currentTarget.style.boxShadow =
-                          "0 10px 26px rgba(0,0,0,0.7)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = "scale(1)";
-                        e.currentTarget.style.boxShadow = "none";
-                      }}
+                      onMouseEnter={(e) =>
+                        !isMobile && avatarHover(e, true)
+                      }
+                      onMouseLeave={(e) =>
+                        !isMobile && avatarHover(e, false)
+                      }
                     />
 
                     <span style={barName}>{r.name}</span>
@@ -140,14 +134,15 @@ export default function Standings() {
                   <tr
                     key={r.id}
                     style={row}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background =
-                        "rgba(255,255,255,0.12)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background =
-                        "rgba(255,255,255,0.05)";
-                    }}
+                    onMouseEnter={(e) =>
+                      !isMobile &&
+                      (e.currentTarget.style.background =
+                        "rgba(255,255,255,0.12)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.background =
+                        "rgba(255,255,255,0.05)")
+                    }
                   >
                     <td style={rankCell}>#{i + 1}</td>
 
@@ -167,7 +162,7 @@ export default function Standings() {
             </table>
           </div>
 
-          {/* SPACE BEFORE FOOTER */}
+          {/* SPACE */}
           <div style={{ height: "80px" }} />
 
           {/* HOME BUTTON */}
@@ -183,9 +178,28 @@ export default function Standings() {
           </a>
         </div>
       </main>
+
       <Footer />
     </>
   );
+}
+
+/* ================= HELPERS ================= */
+
+function elevate(e, up) {
+  e.currentTarget.style.transform = up
+    ? "translateY(-6px)"
+    : "translateY(0)";
+  e.currentTarget.style.boxShadow = up
+    ? "0 20px 45px rgba(0,0,0,0.7)"
+    : "none";
+}
+
+function avatarHover(e, up) {
+  e.currentTarget.style.transform = up ? "scale(1.08)" : "scale(1)";
+  e.currentTarget.style.boxShadow = up
+    ? "0 10px 26px rgba(0,0,0,0.7)"
+    : "none";
 }
 
 /* ================= STYLES ================= */

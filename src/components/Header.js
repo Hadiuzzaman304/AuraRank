@@ -16,7 +16,7 @@ export default function Header() {
     <header
       style={{
         ...header,
-        padding: isMobile ? "8px 14px" : header.padding,
+        padding: isMobile ? "10px 14px" : header.padding,
         height: isMobile ? "auto" : header.height,
       }}
     >
@@ -26,6 +26,8 @@ export default function Header() {
         style={{
           ...logoWrap,
           alignItems: isMobile ? "center" : "flex-start",
+          textAlign: isMobile ? "center" : "left",
+          width: isMobile ? "100%" : "auto",
         }}
         onMouseEnter={(e) => {
           if (!isMobile) {
@@ -49,9 +51,9 @@ export default function Header() {
       <nav
         style={{
           ...nav,
-          justifyContent: isMobile ? "center" : "flex-end",
           width: isMobile ? "100%" : "auto",
-          marginTop: isMobile ? "8px" : "0",
+          justifyContent: isMobile ? "center" : "flex-end",
+          marginTop: isMobile ? "10px" : "0",
         }}
       >
         <NavItem href="/">Home</NavItem>

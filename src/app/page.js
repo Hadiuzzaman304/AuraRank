@@ -20,7 +20,7 @@ export default function HomePage() {
         style={{
           ...auraBackground,
           flexDirection: "column",
-          paddingTop: isMobile ? "90px" : "120px", // header offset
+          paddingTop: isMobile ? "96px" : "120px",
           paddingBottom: "60px",
         }}
       >
@@ -28,7 +28,7 @@ export default function HomePage() {
         <div
           style={{
             ...hero,
-            marginBottom: isMobile ? "40px" : hero.marginBottom,
+            marginBottom: isMobile ? "36px" : hero.marginBottom,
           }}
         >
           <h1
@@ -60,8 +60,8 @@ export default function HomePage() {
               width: isMobile ? "92vw" : card.width,
               maxWidth: "340px",
             }}
-            onMouseEnter={(e) => elevate(e, true)}
-            onMouseLeave={(e) => elevate(e, false)}
+            onMouseEnter={(e) => !isMobile && elevate(e, true)}
+            onMouseLeave={(e) => !isMobile && elevate(e, false)}
           >
             <h2 style={cardTitle}>Give Rating</h2>
             <p style={cardText}>
@@ -77,8 +77,8 @@ export default function HomePage() {
               width: isMobile ? "92vw" : card.width,
               maxWidth: "340px",
             }}
-            onMouseEnter={(e) => elevate(e, true)}
-            onMouseLeave={(e) => elevate(e, false)}
+            onMouseEnter={(e) => !isMobile && elevate(e, true)}
+            onMouseLeave={(e) => !isMobile && elevate(e, false)}
           >
             <h2 style={cardTitle}>AuraIndex</h2>
             <p style={cardText}>
@@ -91,7 +91,7 @@ export default function HomePage() {
         <div
           style={{
             ...aboutRow,
-            marginTop: isMobile ? "10px" : "0",
+            marginTop: isMobile ? "6px" : "0",
           }}
         >
           <a
@@ -101,8 +101,8 @@ export default function HomePage() {
               width: isMobile ? "92vw" : aboutCard.width,
               maxWidth: "360px",
             }}
-            onMouseEnter={(e) => elevate(e, true)}
-            onMouseLeave={(e) => elevate(e, false)}
+            onMouseEnter={(e) => !isMobile && elevate(e, true)}
+            onMouseLeave={(e) => !isMobile && elevate(e, false)}
           >
             <h2 style={cardTitle}>About Me</h2>
             <p style={cardText}>
@@ -173,6 +173,7 @@ const card = {
   borderRadius: "22px",
   background: "rgba(255,255,255,0.05)",
   backdropFilter: "blur(14px)",
+  WebkitBackdropFilter: "blur(14px)",
   textDecoration: "none",
   color: "#fff",
   transition: "all 0.3s ease",
