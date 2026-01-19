@@ -19,92 +19,74 @@ export default function HomePage() {
       <main
         style={{
           ...auraBackground,
-          minHeight: "100vh",
-          display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          paddingTop: isMobile ? "90px" : "120px",
-          paddingBottom: "60px",
+          paddingTop: "78px",        // ✅ ONLY header height
+          paddingBottom: "80px",
         }}
       >
-        {/* HERO */}
-        <div style={hero}>
-          <h1
-            style={{
-              ...title,
-              fontSize: isMobile ? "34px" : title.fontSize,
-            }}
-          >
-            AuraRank
-          </h1>
-
-          <p
-            style={{
-              ...subtitle,
-              fontSize: isMobile ? "13px" : subtitle.fontSize,
-            }}
-          >
-            Algorithm-Driven Aura Ranking System.
-          </p>
-        </div>
-
-        {/* OPTIONS */}
-        <div style={cardRow}>
-          {/* GIVE RATING */}
-          <a
-            href="/rate"
-            style={{
-              ...card,
-              width: isMobile ? "44vw" : card.width,
-              minWidth: isMobile ? "160px" : "auto",
-            }}
-            onMouseEnter={(e) => !isMobile && elevate(e, true)}
-            onMouseLeave={(e) => !isMobile && elevate(e, false)}
-          >
-            <h2 style={cardTitle}>🎯 Give Rating</h2>
-            <p style={cardText}>
-              Rate anonymously & contribute to the AuraIndex
+        {/* CENTER CONTAINER */}
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "900px",
+            margin: "0 auto",
+            padding: isMobile ? "40px 16px 0" : "60px 0 0", // ✅ controlled vertical start
+            boxSizing: "border-box",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          {/* HERO */}
+          <div style={hero}>
+            <h1 style={title}>AuraRank</h1>
+            <p style={subtitle}>
+              Algorithm-Driven Aura Ranking System.
             </p>
-          </a>
+          </div>
 
-          {/* AURA INDEX */}
-          <a
-            href="/standings"
-            style={{
-              ...card,
-              width: isMobile ? "44vw" : card.width,
-              minWidth: isMobile ? "160px" : "auto",
-            }}
-            onMouseEnter={(e) => !isMobile && elevate(e, true)}
-            onMouseLeave={(e) => !isMobile && elevate(e, false)}
-          >
-            <h2 style={cardTitle}>📊 AuraIndex</h2>
-            <p style={cardText}>
-              View live rankings based on community ratings
-            </p>
-          </a>
+          {/* TOP OPTIONS */}
+          <div style={cardRow}>
+            <a
+              href="/rate"
+              style={card}
+              onMouseEnter={(e) => !isMobile && elevate(e, true)}
+              onMouseLeave={(e) => !isMobile && elevate(e, false)}
+            >
+              <h2 style={cardTitle}>🎯 Give Rating</h2>
+              <p style={cardText}>
+                Rate anonymously & contribute to the AuraIndex
+              </p>
+            </a>
+
+            <a
+              href="/standings"
+              style={card}
+              onMouseEnter={(e) => !isMobile && elevate(e, true)}
+              onMouseLeave={(e) => !isMobile && elevate(e, false)}
+            >
+              <h2 style={cardTitle}>📊 AuraIndex</h2>
+              <p style={cardText}>
+                View live rankings based on community ratings
+              </p>
+            </a>
+          </div>
+
+          {/* DEVELOPER */}
+          <div style={aboutRow}>
+            <a
+              href="/about"
+              style={aboutCard}
+              onMouseEnter={(e) => !isMobile && elevate(e, true)}
+              onMouseLeave={(e) => !isMobile && elevate(e, false)}
+            >
+              <h2 style={cardTitle}>👨‍💻 Developer</h2>
+              <p style={cardText}>
+                Project details & developer information
+              </p>
+            </a>
+          </div>
         </div>
-
-        {/* DEVELOPER */}
-        <div style={aboutRow}>
-          <a
-            href="/about"
-            style={{
-              ...aboutCard,
-              width: isMobile ? "90vw" : aboutCard.width,
-            }}
-            onMouseEnter={(e) => !isMobile && elevate(e, true)}
-            onMouseLeave={(e) => !isMobile && elevate(e, false)}
-          >
-            <h2 style={cardTitle}>👨‍💻 Developer</h2>
-            <p style={cardText}>
-              Project details & developer information
-            </p>
-          </a>
-        </div>
-
-        <div style={{ height: "80px" }} />
       </main>
 
       <Footer />
@@ -126,17 +108,15 @@ function elevate(e, up) {
 /* ================= STYLES ================= */
 
 const hero = {
+  marginBottom: "48px",
   textAlign: "center",
-  marginBottom: "42px",
-  marginTop: "-140px",        // ✅ reduced top gap
-  pointerEvents: "none",      // ✅ prevents hover blocking
 };
 
 const title = {
   color: "#ff3b3b",
   fontSize: "44px",
   fontStyle: "italic",
-  marginBottom: "8px",
+  marginBottom: "6px",
 };
 
 const subtitle = {
@@ -149,10 +129,9 @@ const subtitle = {
 const cardRow = {
   display: "flex",
   justifyContent: "center",
-  alignItems: "stretch",
-  gap: "24px",
-  flexWrap: "nowrap",        // ✅ keeps desktop layout
-  marginBottom: "28px",
+  gap: "28px",
+  flexWrap: "wrap",
+  marginBottom: "36px",
 };
 
 const aboutRow = {
@@ -173,8 +152,7 @@ const card = {
   color: "#fff",
   transition: "all 0.3s ease",
   boxShadow: "0 20px 50px rgba(0,0,0,0.6)",
-  position: "relative",
-  zIndex: 2,
+  boxSizing: "border-box",
 };
 
 const aboutCard = {
@@ -184,8 +162,8 @@ const aboutCard = {
 
 const cardTitle = {
   color: "#ffbf69",
-  fontSize: "20px",          // ✅ restored size
   marginBottom: "10px",
+  fontSize: "20px",
 };
 
 const cardText = {
