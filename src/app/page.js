@@ -21,8 +21,7 @@ export default function HomePage() {
           ...auraBackground,
           flexDirection: "column",
           paddingTop: isMobile ? "96px" : "120px",
-          paddingBottom: "60px",
-          overflowX: "hidden", // ✅ HARD STOP horizontal scroll
+          paddingBottom: "80px",
         }}
       >
         {/* HERO */}
@@ -33,65 +32,58 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* MAIN OPTIONS */}
+        {/* CONTENT WRAPPER (THIS FIXES EDGE TOUCHING) */}
         <div
           style={{
-            ...cardRow,
-            flexWrap: isMobile ? "nowrap" : "wrap",
+            width: "100%",
+            maxWidth: "900px",
+            padding: isMobile ? "0 16px" : "0",
+            margin: "0 auto",
+            boxSizing: "border-box",
           }}
         >
-          {/* GIVE RATING */}
-          <a
-            href="/rate"
-            style={{
-              ...card,
-              width: isMobile ? "48%" : card.width,
-            }}
-            onMouseEnter={(e) => !isMobile && elevate(e, true)}
-            onMouseLeave={(e) => !isMobile && elevate(e, false)}
-          >
-            <h2 style={cardTitle}>🎯 Give Rating</h2>
-            <p style={cardText}>
-              Rate anonymously & contribute to the AuraIndex
-            </p>
-          </a>
+          {/* TOP CARDS */}
+          <div style={cardRow}>
+            <a
+              href="/rate"
+              style={card}
+              onMouseEnter={(e) => !isMobile && elevate(e, true)}
+              onMouseLeave={(e) => !isMobile && elevate(e, false)}
+            >
+              <h2 style={cardTitle}>🎯 Give Rating</h2>
+              <p style={cardText}>
+                Rate anonymously & contribute to the AuraIndex
+              </p>
+            </a>
 
-          {/* AURA INDEX */}
-          <a
-            href="/standings"
-            style={{
-              ...card,
-              width: isMobile ? "48%" : card.width,
-            }}
-            onMouseEnter={(e) => !isMobile && elevate(e, true)}
-            onMouseLeave={(e) => !isMobile && elevate(e, false)}
-          >
-            <h2 style={cardTitle}>📊 AuraIndex</h2>
-            <p style={cardText}>
-              View live rankings based on community ratings
-            </p>
-          </a>
+            <a
+              href="/standings"
+              style={card}
+              onMouseEnter={(e) => !isMobile && elevate(e, true)}
+              onMouseLeave={(e) => !isMobile && elevate(e, false)}
+            >
+              <h2 style={cardTitle}>📊 AuraIndex</h2>
+              <p style={cardText}>
+                View live rankings based on community ratings
+              </p>
+            </a>
+          </div>
+
+          {/* ABOUT */}
+          <div style={aboutRow}>
+            <a
+              href="/about"
+              style={aboutCard}
+              onMouseEnter={(e) => !isMobile && elevate(e, true)}
+              onMouseLeave={(e) => !isMobile && elevate(e, false)}
+            >
+              <h2 style={cardTitle}>👤 About Me</h2>
+              <p style={cardText}>
+                Project details & developer information
+              </p>
+            </a>
+          </div>
         </div>
-
-        {/* ABOUT */}
-        <div style={aboutRow}>
-          <a
-            href="/about"
-            style={{
-              ...aboutCard,
-              width: isMobile ? "96%" : aboutCard.width,
-            }}
-            onMouseEnter={(e) => !isMobile && elevate(e, true)}
-            onMouseLeave={(e) => !isMobile && elevate(e, false)}
-          >
-            <h2 style={cardTitle}>👤 About Me</h2>
-            <p style={cardText}>
-              Project details & developer information
-            </p>
-          </a>
-        </div>
-
-        <div style={{ height: "80px" }} />
       </main>
 
       <Footer />
@@ -113,13 +105,13 @@ function elevate(e, up) {
 /* ================= STYLES ================= */
 
 const hero = {
-  marginBottom: "50px",
+  marginBottom: "56px",
   textAlign: "center",
 };
 
 const title = {
   color: "#ff3b3b",
-  fontSize: "44px", // ✅ restored original size
+  fontSize: "44px",
   fontStyle: "italic",
   marginBottom: "8px",
 };
@@ -134,8 +126,9 @@ const subtitle = {
 const cardRow = {
   display: "flex",
   justifyContent: "center",
-  gap: "16px",
-  marginBottom: "30px",
+  gap: "28px",
+  flexWrap: "wrap",
+  marginBottom: "36px",
 };
 
 const aboutRow = {
@@ -147,7 +140,7 @@ const aboutRow = {
 
 const card = {
   width: "300px",
-  padding: "28px",
+  padding: "32px",
   borderRadius: "22px",
   background: "rgba(255,255,255,0.05)",
   backdropFilter: "blur(14px)",
@@ -156,6 +149,7 @@ const card = {
   color: "#fff",
   transition: "all 0.3s ease",
   boxShadow: "0 20px 50px rgba(0,0,0,0.6)",
+  boxSizing: "border-box",
 };
 
 const aboutCard = {
@@ -166,7 +160,7 @@ const aboutCard = {
 const cardTitle = {
   color: "#ffbf69",
   marginBottom: "10px",
-  fontSize: "18px", // ✅ restored
+  fontSize: "20px",
 };
 
 const cardText = {
