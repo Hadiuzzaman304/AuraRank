@@ -115,7 +115,7 @@ export default function RatePage() {
               width: isMobile ? "100%" : "380px",
               maxWidth: isMobile ? "330px" : "380px",
               padding: isMobile ? "28px 22px" : card.padding,
-              marginInline: isMobile ? "16px" : "0",
+              marginInline: isMobile ? "18px" : "0",
             }}
             onMouseEnter={(e) => !isMobile && elevate(e, true)}
             onMouseLeave={(e) => !isMobile && elevate(e, false)}
