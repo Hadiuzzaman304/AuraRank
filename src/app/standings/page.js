@@ -51,19 +51,25 @@ export default function Standings() {
           style={{
             ...wrap,
             paddingTop: isMobile ? "96px" : wrap.paddingTop,
+            paddingInline: isMobile ? "14px" : "0", // ✅ mobile side padding
           }}
         >
           <h1 style={heading}>AuraIndex</h1>
 
           {/* ================= BAR GRAPH ================= */}
-          <div style={chartBox}>
+          <div
+            style={{
+              ...chartBox,
+              padding: isMobile ? "18px 14px" : chartBox.padding, // ✅ mobile spacing
+            }}
+          >
             <h3 style={chartTitle}>Average Rating Distribution</h3>
 
             <div
               style={{
                 ...chart,
                 overflowX: isMobile ? "auto" : "visible",
-                paddingBottom: isMobile ? "10px" : "0",
+                paddingBottom: isMobile ? "12px" : "0",
               }}
             >
               {rows.map((r) => {
@@ -116,6 +122,7 @@ export default function Standings() {
           <div
             style={{
               ...tableWrap,
+              paddingInline: isMobile ? "6px" : "0", // ✅ mobile safe area
               marginBottom: isMobile ? "40px" : "0",
             }}
           >
@@ -162,10 +169,8 @@ export default function Standings() {
             </table>
           </div>
 
-          {/* SPACE */}
           <div style={{ height: "80px" }} />
 
-          {/* HOME BUTTON */}
           <a
             href="/"
             style={{
