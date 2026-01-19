@@ -46,23 +46,24 @@ export default function Standings() {
     <>
       <Header />
 
-      <main style={auraBackground}>
+      <main
+        style={{
+          ...auraBackground,
+          overflowX: "hidden", // ✅ prevents page-level white strip
+        }}
+      >
         <div
           style={{
             ...wrap,
-            paddingTop: isMobile ? "96px" : wrap.paddingTop,
-            paddingInline: isMobile ? "14px" : "0", // ✅ mobile side padding
+            paddingTop: "78px",
+            paddingLeft: isMobile ? "14px" : "0",
+            paddingRight: isMobile ? "14px" : "0",
           }}
         >
           <h1 style={heading}>AuraIndex</h1>
 
           {/* ================= BAR GRAPH ================= */}
-          <div
-            style={{
-              ...chartBox,
-              padding: isMobile ? "18px 14px" : chartBox.padding, // ✅ mobile spacing
-            }}
-          >
+          <div style={chartBox}>
             <h3 style={chartTitle}>Average Rating Distribution</h3>
 
             <div
@@ -80,7 +81,7 @@ export default function Standings() {
                     key={r.id}
                     style={{
                       ...barItem,
-                      minWidth: isMobile ? "64px" : "auto",
+                      minWidth: isMobile ? "70px" : "auto",
                     }}
                   >
                     <div style={barContainer}>
@@ -89,28 +90,12 @@ export default function Standings() {
                           ...bar,
                           height: `${Math.max(heightPercent, 6)}%`,
                         }}
-                        onMouseEnter={(e) =>
-                          !isMobile && elevate(e, true)
-                        }
-                        onMouseLeave={(e) =>
-                          !isMobile && elevate(e, false)
-                        }
                       >
                         <span style={barValue}>{r.avg}</span>
                       </div>
                     </div>
 
-                    <img
-                      src={r.img}
-                      style={barAvatar}
-                      onMouseEnter={(e) =>
-                        !isMobile && avatarHover(e, true)
-                      }
-                      onMouseLeave={(e) =>
-                        !isMobile && avatarHover(e, false)
-                      }
-                    />
-
+                    <img src={r.img} style={barAvatar} />
                     <span style={barName}>{r.name}</span>
                   </div>
                 );
@@ -122,35 +107,30 @@ export default function Standings() {
           <div
             style={{
               ...tableWrap,
-              paddingInline: isMobile ? "6px" : "0", // ✅ mobile safe area
-              marginBottom: isMobile ? "40px" : "0",
+              marginBottom: isMobile ? "50px" : "0",
+              overflowX: "auto",
+              WebkitOverflowScrolling: "touch",
             }}
           >
-            <table style={table}>
+            <table
+              style={{
+                ...table,
+                display: isMobile ? "block" : "table",
+                maxWidth: "100%",
+              }}
+            >
               <thead>
                 <tr>
                   <th style={th}>Rank</th>
                   <th style={{ ...th, textAlign: "left" }}>Person</th>
-                  <th style={th}>Total Points</th>
-                  <th style={th}>Average</th>
+                  <th style={th}>Total</th>
+                  <th style={th}>Avg</th>
                 </tr>
               </thead>
 
               <tbody>
                 {rows.map((r, i) => (
-                  <tr
-                    key={r.id}
-                    style={row}
-                    onMouseEnter={(e) =>
-                      !isMobile &&
-                      (e.currentTarget.style.background =
-                        "rgba(255,255,255,0.12)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.background =
-                        "rgba(255,255,255,0.05)")
-                    }
-                  >
+                  <tr key={r.id} style={row}>
                     <td style={rankCell}>#{i + 1}</td>
 
                     <td style={personCell}>
@@ -175,8 +155,8 @@ export default function Standings() {
             href="/"
             style={{
               ...homeBtn,
-              bottom: isMobile ? "20px" : homeBtn.bottom,
-              right: isMobile ? "20px" : homeBtn.right,
+              bottom: isMobile ? "20px" : "30px",
+              right: isMobile ? "20px" : "30px",
             }}
           >
             ← Home
@@ -189,24 +169,6 @@ export default function Standings() {
   );
 }
 
-/* ================= HELPERS ================= */
-
-function elevate(e, up) {
-  e.currentTarget.style.transform = up
-    ? "translateY(-6px)"
-    : "translateY(0)";
-  e.currentTarget.style.boxShadow = up
-    ? "0 20px 45px rgba(0,0,0,0.7)"
-    : "none";
-}
-
-function avatarHover(e, up) {
-  e.currentTarget.style.transform = up ? "scale(1.08)" : "scale(1)";
-  e.currentTarget.style.boxShadow = up
-    ? "0 10px 26px rgba(0,0,0,0.7)"
-    : "none";
-}
-
 /* ================= STYLES ================= */
 
 const wrap = {
@@ -214,7 +176,6 @@ const wrap = {
   maxWidth: "1200px",
   margin: "0 auto",
   position: "relative",
-  paddingTop: "78px",
 };
 
 const heading = {
@@ -224,11 +185,11 @@ const heading = {
   marginBottom: "30px",
 };
 
-/* ---------- BAR GRAPH ---------- */
+/* BAR GRAPH */
 
 const chartBox = {
   marginBottom: "60px",
-  padding: "25px",
+  padding: "22px",
   background: "rgba(255,255,255,0.04)",
   borderRadius: "18px",
   border: "2px solid rgba(255,59,59,0.5)",
@@ -265,8 +226,6 @@ const bar = {
   width: "100%",
   background: "linear-gradient(180deg,#ff3b3b,#4b1d6d)",
   borderRadius: "8px 8px 0 0",
-  position: "relative",
-  transition: "all 0.35s ease",
 };
 
 const barValue = {
@@ -285,7 +244,6 @@ const barAvatar = {
   borderRadius: "50%",
   marginTop: "10px",
   border: "2px solid #ff3b3b",
-  transition: "all 0.25s ease",
 };
 
 const barName = {
@@ -294,18 +252,18 @@ const barName = {
   fontWeight: "600",
 };
 
-/* ---------- TABLE ---------- */
+/* TABLE */
 
 const tableWrap = {
-  overflowX: "auto",
+  width: "100%",
 };
 
 const table = {
   width: "100%",
+  minWidth: "640px",
   borderCollapse: "collapse",
   background: "rgba(255,255,255,0.06)",
   backdropFilter: "blur(14px)",
-  WebkitBackdropFilter: "blur(14px)",
   borderRadius: "16px",
   overflow: "hidden",
   border: "1.5px solid rgba(255,59,59,0.45)",
@@ -330,7 +288,6 @@ const rankCell = {
 
 const row = {
   background: "rgba(255,255,255,0.05)",
-  transition: "background 0.25s ease",
 };
 
 const personCell = {
@@ -359,12 +316,10 @@ const avgCell = {
   fontWeight: "600",
 };
 
-/* ---------- HOME BUTTON ---------- */
+/* HOME BUTTON */
 
 const homeBtn = {
   position: "fixed",
-  bottom: "30px",
-  right: "30px",
   padding: "12px 26px",
   borderRadius: "14px",
   background: "linear-gradient(135deg,#ff3b3b,#4b1d6d)",
@@ -372,5 +327,4 @@ const homeBtn = {
   textDecoration: "none",
   fontWeight: "600",
   boxShadow: "0 12px 30px rgba(0,0,0,0.6)",
-  transition: "all 0.3s ease",
 };
