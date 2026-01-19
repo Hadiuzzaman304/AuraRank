@@ -9,7 +9,7 @@ import { auraBackground } from "@/styles/auraBackground";
 
 const STORAGE_KEY = "aurarank-global";
 
-/* ================= STORAGE ================= */
+/* ================= INIT ================= */
 
 function getInitialData() {
   if (typeof window === "undefined") return {};
@@ -82,8 +82,7 @@ export default function RatePage() {
     return (
       <>
         <Header />
-
-        <main style={{ ...auraBackground, paddingTop: "96px" }}>
+        <main style={{ ...auraBackground, paddingTop: "120px" }}>
           <div style={endStyle}>
             <h2 style={{ marginBottom: "30px" }}>
               Thank you for your response
@@ -99,13 +98,12 @@ export default function RatePage() {
             </a>
           </div>
         </main>
-
         <Footer />
       </>
     );
   }
 
-  /* ================= MAIN UI ================= */
+  /* ================= MAIN ================= */
 
   return (
     <>
@@ -114,15 +112,21 @@ export default function RatePage() {
       <main
         style={{
           ...auraBackground,
-          paddingTop: "96px",              // safe header offset
+          paddingTop: isMobile ? "140px" : "120px",
           paddingBottom: "80px",
         }}
       >
-        <div style={pageWrap}>
+        <div
+          style={{
+            ...container,
+            alignItems: isMobile ? "flex-start" : "center",
+          }}
+        >
           <div
             style={{
               ...card,
-              padding: isMobile ? "24px" : card.padding,
+              width: isMobile ? "92vw" : card.width,
+              padding: isMobile ? "26px 22px" : card.padding,
             }}
             onMouseEnter={(e) => !isMobile && elevate(e, true)}
             onMouseLeave={(e) => !isMobile && elevate(e, false)}
@@ -149,18 +153,18 @@ export default function RatePage() {
 
             <img
               src={selection.img}
-              alt={person.name}
-              style={image}
+              style={{
+                ...image,
+                width: "100%",
+                maxWidth: "320px",
+                margin: "0 auto",
+              }}
             />
 
             {/* BUTTONS */}
             <div style={buttonRow}>
               {[1, 2, 3, 4, 5].map((n) => (
-                <button
-                  key={n}
-                  onClick={() => rate(n)}
-                  style={ratingBtn}
-                >
+                <button key={n} onClick={() => rate(n)} style={ratingBtn}>
                   {n}
                 </button>
               ))}
@@ -191,32 +195,27 @@ function elevate(e, up) {
 
 /* ================= STYLES ================= */
 
-/* SAFE PAGE WRAPPER */
-const pageWrap = {
-  width: "100%",
-  maxWidth: "420px",
-  margin: "0 auto",
-  padding: "0 16px",          // 🔥 fixes edge touching
+const container = {
+  minHeight: "calc(100vh - 160px)",
   display: "flex",
   justifyContent: "center",
 };
 
-/* CARD */
 const card = {
-  width: "100%",
-  maxWidth: "380px",
   background: "rgba(255,255,255,0.05)",
   backdropFilter: "blur(14px)",
   WebkitBackdropFilter: "blur(14px)",
   padding: "40px",
-  borderRadius: "18px",
+  borderRadius: "20px",
   color: "#fff",
   textAlign: "center",
   boxShadow: "0 30px 60px rgba(0,0,0,0.6)",
+  width: "380px",
   transition: "all 0.3s ease",
 };
 
 /* PROGRESS */
+
 const progressSection = {
   textAlign: "left",
   marginBottom: "22px",
@@ -226,7 +225,7 @@ const progressLabel = {
   fontSize: "13px",
   fontStyle: "italic",
   color: "#ff9a9a",
-  marginBottom: "10px",
+  marginBottom: "12px",
   display: "block",
 };
 
@@ -248,53 +247,55 @@ const progressText = {
   marginTop: "6px",
   fontSize: "12px",
   opacity: 0.8,
+  display: "block",
   textAlign: "center",
 };
 
 /* IMAGE */
+
 const image = {
-  width: "100%",
-  maxWidth: "320px",
   borderRadius: "14px",
   boxShadow: "0 20px 40px rgba(0,0,0,0.6)",
-  display: "block",
-  margin: "0 auto",
+  transition: "all 0.35s ease",
 };
 
 /* BUTTONS */
+
 const buttonRow = {
   marginTop: "26px",
   display: "flex",
   justifyContent: "center",
+  flexWrap: "wrap",
   gap: "14px",
-  flexWrap: "wrap",          // 🔥 prevents overflow
 };
 
 const ratingBtn = {
-  width: "52px",
-  height: "52px",
+  width: "54px",
+  height: "54px",
   borderRadius: "50%",
   border: "1px solid rgba(255,255,255,0.25)",
   background: "rgba(255,255,255,0.08)",
   backdropFilter: "blur(14px)",
   WebkitBackdropFilter: "blur(14px)",
   color: "#ffbf69",
-  fontSize: "18px",
+  fontSize: "20px",
   fontWeight: "700",
   cursor: "pointer",
 };
 
 /* DEFINING LINE */
+
 const defineLine = {
   marginTop: "18px",
-  fontSize: "14px",
+  fontSize: "15px",
   fontStyle: "italic",
   color: "#d1a3ff",
 };
 
-/* END SCREEN */
+/* END */
+
 const endStyle = {
-  minHeight: "calc(100vh - 160px)",
+  minHeight: "calc(100vh - 120px)",
   display: "flex",
   flexDirection: "column",
   justifyContent: "center",
