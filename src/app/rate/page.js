@@ -9,6 +9,8 @@ import { auraBackground } from "@/styles/auraBackground";
 
 const STORAGE_KEY = "aurarank-global";
 
+/* ================= STORAGE ================= */
+
 function getInitialData() {
   if (typeof window === "undefined") return {};
   const saved = localStorage.getItem(STORAGE_KEY);
@@ -20,6 +22,8 @@ function getInitialData() {
   });
   return init;
 }
+
+/* ================= PAGE ================= */
 
 export default function RatePage() {
   const [index, setIndex] = useState(0);
@@ -78,7 +82,8 @@ export default function RatePage() {
     return (
       <>
         <Header />
-        <main style={{ ...auraBackground, paddingTop: "78px" }}>
+
+        <main style={{ ...auraBackground, paddingTop: "96px" }}>
           <div style={endStyle}>
             <h2 style={{ marginBottom: "30px" }}>
               Thank you for your response
@@ -94,6 +99,7 @@ export default function RatePage() {
             </a>
           </div>
         </main>
+
         <Footer />
       </>
     );
@@ -105,13 +111,18 @@ export default function RatePage() {
     <>
       <Header />
 
-      <main style={{ ...auraBackground, paddingTop: "78px" }}>
-        <div style={container}>
+      <main
+        style={{
+          ...auraBackground,
+          paddingTop: "96px",              // safe header offset
+          paddingBottom: "80px",
+        }}
+      >
+        <div style={pageWrap}>
           <div
             style={{
               ...card,
-              width: isMobile ? "92vw" : card.width,
-              padding: isMobile ? "26px" : card.padding,
+              padding: isMobile ? "24px" : card.padding,
             }}
             onMouseEnter={(e) => !isMobile && elevate(e, true)}
             onMouseLeave={(e) => !isMobile && elevate(e, false)}
@@ -134,24 +145,16 @@ export default function RatePage() {
               </span>
             </div>
 
-            <h2 style={{ marginBottom: "12px" }}>{person.name}</h2>
+            <h2 style={{ marginBottom: "14px" }}>{person.name}</h2>
 
             <img
               src={selection.img}
-              style={{
-                ...image,
-                width: isMobile ? "100%" : image.width,
-                maxWidth: "320px",
-              }}
+              alt={person.name}
+              style={image}
             />
 
             {/* BUTTONS */}
-            <div
-              style={{
-                ...buttonRow,
-                flexWrap: isMobile ? "wrap" : "nowrap",
-              }}
-            >
+            <div style={buttonRow}>
               {[1, 2, 3, 4, 5].map((n) => (
                 <button
                   key={n}
@@ -163,7 +166,6 @@ export default function RatePage() {
               ))}
             </div>
 
-            {/* DEFINING LINE */}
             <div style={defineLine}>
               Define Rank Through Aura. ⭐
             </div>
@@ -189,14 +191,20 @@ function elevate(e, up) {
 
 /* ================= STYLES ================= */
 
-const container = {
-  minHeight: "calc(100vh - 120px)",
+/* SAFE PAGE WRAPPER */
+const pageWrap = {
+  width: "100%",
+  maxWidth: "420px",
+  margin: "0 auto",
+  padding: "0 16px",          // 🔥 fixes edge touching
   display: "flex",
   justifyContent: "center",
-  alignItems: "center",
 };
 
+/* CARD */
 const card = {
+  width: "100%",
+  maxWidth: "380px",
   background: "rgba(255,255,255,0.05)",
   backdropFilter: "blur(14px)",
   WebkitBackdropFilter: "blur(14px)",
@@ -205,12 +213,10 @@ const card = {
   color: "#fff",
   textAlign: "center",
   boxShadow: "0 30px 60px rgba(0,0,0,0.6)",
-  width: "380px",
   transition: "all 0.3s ease",
 };
 
 /* PROGRESS */
-
 const progressSection = {
   textAlign: "left",
   marginBottom: "22px",
@@ -220,7 +226,7 @@ const progressLabel = {
   fontSize: "13px",
   fontStyle: "italic",
   color: "#ff9a9a",
-  marginBottom: "12px",
+  marginBottom: "10px",
   display: "block",
 };
 
@@ -242,55 +248,53 @@ const progressText = {
   marginTop: "6px",
   fontSize: "12px",
   opacity: 0.8,
-  display: "block",
   textAlign: "center",
 };
 
 /* IMAGE */
-
 const image = {
-  width: "320px",
+  width: "100%",
+  maxWidth: "320px",
   borderRadius: "14px",
   boxShadow: "0 20px 40px rgba(0,0,0,0.6)",
-  transition: "all 0.35s ease",
+  display: "block",
+  margin: "0 auto",
 };
 
 /* BUTTONS */
-
 const buttonRow = {
   marginTop: "26px",
   display: "flex",
   justifyContent: "center",
   gap: "14px",
+  flexWrap: "wrap",          // 🔥 prevents overflow
 };
 
 const ratingBtn = {
-  width: "54px",
-  height: "54px",
+  width: "52px",
+  height: "52px",
   borderRadius: "50%",
   border: "1px solid rgba(255,255,255,0.25)",
   background: "rgba(255,255,255,0.08)",
   backdropFilter: "blur(14px)",
   WebkitBackdropFilter: "blur(14px)",
   color: "#ffbf69",
-  fontSize: "20px",
+  fontSize: "18px",
   fontWeight: "700",
   cursor: "pointer",
 };
 
 /* DEFINING LINE */
-
 const defineLine = {
-  marginTop: "20px",
-  fontSize: "15px",
+  marginTop: "18px",
+  fontSize: "14px",
   fontStyle: "italic",
   color: "#d1a3ff",
 };
 
 /* END SCREEN */
-
 const endStyle = {
-  minHeight: "calc(100vh - 120px)",
+  minHeight: "calc(100vh - 160px)",
   display: "flex",
   flexDirection: "column",
   justifyContent: "center",
