@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Developer — AuraRank</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--accent:#ff6b6b;--accent2:#ffa94d;--glass:rgba(255,255,255,0.07);--glass-border:rgba(255,255,255,0.15);}
+body{min-height:100vh;background:#060612;font-family:'Outfit',sans-serif;color:#fff;overflow-x:hidden;}
+.bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 70% 50% at 30% 30%,rgba(255,107,107,0.15) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 70% 70%,rgba(120,80,255,0.18) 0%,transparent 60%),#060612;}
+.orb{position:fixed;border-radius:50%;filter:blur(80px);opacity:0.35;z-index:0;pointer-events:none;animation:float 8s ease-in-out infinite;}
+.orb1{width:400px;height:400px;background:rgba(255,107,107,0.25);top:-100px;left:-100px;}
+.orb2{width:300px;height:300px;background:rgba(120,80,255,0.3);bottom:-80px;right:-80px;animation-delay:-4s;}
+.orb3{width:200px;height:200px;background:rgba(255,169,77,0.2);top:40%;left:60%;animation-delay:-2s;}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-20px);}}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;background:rgba(6,6,18,0.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.08);}
+.nav-logo{font-size:1.3rem;font-weight:800;letter-spacing:-1px;background:linear-gradient(135deg,#ff6b6b,#ffa94d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none;}
+.nav-links{display:flex;gap:8px;}
+.nav-link{padding:7px 16px;border-radius:20px;font-size:0.78rem;font-weight:500;text-decoration:none;color:rgba(255,255,255,0.6);transition:all 0.2s;border:1px solid transparent;font-family:'Outfit',sans-serif;background:none;cursor:pointer;}
+.nav-link:hover{color:#fff;background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.12);}
+.nav-link.active{color:#fff;background:rgba(255,107,107,0.15);border-color:rgba(255,107,107,0.3);}
+
+.wrap{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:100px 20px 100px;}
+
+/* PROFILE CARD */
+.profile-card{
+  background:var(--glass);
+  border:1px solid var(--glass-border);
+  border-radius:32px;
+  padding:48px 40px;
+  width:100%;max-width:460px;
+  text-align:center;
+  backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);
+  box-shadow:0 30px 80px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.12);
+  animation:fadeUp 0.6s ease both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+
+.avatar-wrap{
+  width:110px;height:110px;margin:0 auto 20px;
+  border-radius:50%;
+  padding:3px;
+  background:linear-gradient(135deg,#ff6b6b,#ffa94d,#7850ff);
+}
+.avatar-inner{
+  width:100%;height:100%;border-radius:50%;overflow:hidden;
+  background:#1a1a2a;
+}
+.avatar-inner img{width:100%;height:100%;object-fit:cover;display:block;}
+
+.dev-name{
+  font-size:1.6rem;font-weight:800;letter-spacing:-0.5px;
+  background:linear-gradient(135deg,#ff6b6b,#ffa94d);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:6px;
+}
+.dev-role{font-size:0.85rem;color:rgba(255,255,255,0.45);margin-bottom:32px;letter-spacing:0.5px;}
+
+.divider{height:1px;background:rgba(255,255,255,0.08);margin:0 -40px 28px;}
+
+.info-grid{display:flex;flex-direction:column;gap:0;}
+.info-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:13px 0;border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.info-row:last-child{border-bottom:none;}
+.info-key{font-size:0.8rem;color:rgba(255,255,255,0.4);}
+.info-val{font-size:0.88rem;font-weight:600;color:rgba(255,255,255,0.85);}
+
+.quote{
+  margin-top:28px;
+  font-family:'Playfair Display',serif;
+  font-style:italic;
+  font-size:0.9rem;
+  color:#ffa94d;
+  line-height:1.5;
+  opacity:0.85;
+}
+
+/* ADMIN BUTTON */
+.admin-btn{
+  position:fixed;bottom:24px;right:24px;z-index:200;
+  padding:12px 20px;
+  background:rgba(255,50,50,0.15);
+  border:1px solid rgba(255,80,80,0.3);
+  border-radius:20px;
+  color:rgba(255,120,120,0.9);
+  font-size:0.78rem;font-weight:600;
+  font-family:'Outfit',sans-serif;
+  cursor:pointer;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  transition:all 0.2s;
+}
+.admin-btn:hover{background:rgba(255,50,50,0.25);border-color:rgba(255,80,80,0.5);color:#ff6b6b;}
+
+/* MODAL */
+.modal-bg{
+  position:fixed;inset:0;z-index:300;
+  background:rgba(6,6,18,0.8);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+.modal-bg.show{display:flex;}
+.modal{
+  background:rgba(20,20,35,0.95);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:24px;padding:36px 32px;
+  width:100%;max-width:360px;text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,0.6);
+  animation:fadeUp 0.3s ease;
+}
+.modal h3{font-size:1.2rem;font-weight:700;margin-bottom:6px;}
+.modal p{font-size:0.82rem;color:rgba(255,255,255,0.45);margin-bottom:24px;}
+.modal input{
+  width:100%;padding:13px 16px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:12px;color:#fff;
+  font-size:1rem;font-family:'Outfit',sans-serif;
+  outline:none;margin-bottom:8px;
+  transition:all 0.2s;text-align:center;letter-spacing:4px;
+}
+.modal input:focus{border-color:rgba(255,107,107,0.5);background:rgba(255,107,107,0.06);}
+.modal-err{color:#ff6b6b;font-size:0.78rem;margin-bottom:14px;min-height:18px;}
+.modal-btns{display:flex;gap:10px;}
+.modal-cancel{flex:1;padding:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:rgba(255,255,255,0.6);font-size:0.9rem;font-family:'Outfit',sans-serif;cursor:pointer;transition:all 0.2s;}
+.modal-cancel:hover{background:rgba(255,255,255,0.1);}
+.modal-confirm{flex:1;padding:12px;background:rgba(255,50,50,0.2);border:1px solid rgba(255,80,80,0.3);border-radius:12px;color:#ff6b6b;font-size:0.9rem;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;transition:all 0.2s;}
+.modal-confirm:hover{background:rgba(255,50,50,0.3);}
+
+/* SUCCESS */
+.modal-success{display:none;flex-direction:column;align-items:center;gap:12px;}
+.success-icon{font-size:3rem;}
+.modal-success p{color:rgba(255,255,255,0.5);font-size:0.85rem;}
+
+@media(max-width:480px){
+  .profile-card{padding:36px 24px;}
+  .divider{margin:0 -24px 24px;}
+}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<nav>
+  <a class="nav-logo" href="index.html">AuraRank</a>
+  <div class="nav-links">
+    <a class="nav-link" href="index.html">Home</a>
+    <a class="nav-link" href="rate.html">Rate</a>
+    <a class="nav-link" href="results.html">AuraIndex</a>
+    <a class="nav-link active" href="developer.html">Dev</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="profile-card">
+    <div class="avatar-wrap">
+      <div class="avatar-inner">
+        <img src="dev.jpg" alt="Developer" onerror="this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;font-size:2.5rem;\'>👨‍💻</div>'"/>
+      </div>
+    </div>
+
+    <div class="dev-name">Hadiuzzaman Ome</div>
+    <div class="dev-role">CSE Undergraduate · AI Enthusiast</div>
+
+    <div class="divider"></div>
+
+    <div class="info-grid">
+      <div class="info-row">
+        <span class="info-key">Section</span>
+        <span class="info-val">65-H</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">Student ID</span>
+        <span class="info-val">232-15-304</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">Department</span>
+        <span class="info-val">Computer Science & Engineering</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">University</span>
+        <span class="info-val">Daffodil International University</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">Course</span>
+        <span class="info-val">CSE316 · Artificial Intelligence</span>
+      </div>
+    </div>
+
+    <div class="quote">"Designing systems where logic meets intuition."</div>
+  </div>
+</div>
+
+<!-- Admin Button -->
+<button class="admin-btn" onclick="openAdmin()">⚙ Clear Data — Admin</button>
+
+<!-- Admin Modal -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div id="modalForm">
+      <h3>Admin Access</h3>
+      <p>Enter the admin password to clear all rating data.</p>
+      <input type="password" id="adminPass" placeholder="••••••" onkeydown="if(event.key==='Enter')confirmClear()"/>
+      <div class="modal-err" id="modalErr"></div>
+      <div class="modal-btns">
+        <button class="modal-cancel" onclick="closeAdmin()">Cancel</button>
+        <button class="modal-confirm" onclick="confirmClear()">Clear All Data</button>
+      </div>
+    </div>
+    <div class="modal-success" id="modalSuccess">
+      <div class="success-icon">✅</div>
+      <h3>Data Cleared</h3>
+      <p>All rating data has been removed successfully.</p>
+      <button class="modal-cancel" onclick="closeAdmin()" style="margin-top:8px">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openAdmin(){
+  document.getElementById('modalBg').classList.add('show');
+  document.getElementById('adminPass').value='';
+  document.getElementById('modalErr').textContent='';
+  document.getElementById('modalForm').style.display='block';
+  document.getElementById('modalSuccess').style.display='none';
+  setTimeout(()=>document.getElementById('adminPass').focus(),100);
+}
+function closeAdmin(){
+  document.getElementById('modalBg').classList.remove('show');
+}
+function confirmClear(){
+  const pass=document.getElementById('adminPass').value;
+  if(pass!=='leo15'){
+    document.getElementById('modalErr').textContent='Incorrect password. Try again.';
+    document.getElementById('adminPass').value='';
+    document.getElementById('adminPass').focus();
+    return;
+  }
+  // Clear all fr_ keys
+  const keys=[];
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k&&k.startsWith('fr_')) keys.push(k);
+  }
+  keys.forEach(k=>localStorage.removeItem(k));
+  document.getElementById('modalForm').style.display='none';
+  document.getElementById('modalSuccess').style.display='flex';
+}
+document.getElementById('modalBg').addEventListener('click',function(e){
+  if(e.target===this) closeAdmin();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AuraRank</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --accent:#ff6b6b;
+  --accent2:#ffa94d;
+  --glass:rgba(255,255,255,0.07);
+  --glass-border:rgba(255,255,255,0.15);
+  --text:#fff;
+  --muted:rgba(255,255,255,0.5);
+}
+body{
+  min-height:100vh;
+  background:#060612;
+  font-family:'Outfit',sans-serif;
+  color:var(--text);
+  overflow-x:hidden;
+  display:flex;flex-direction:column;
+}
+.bg{
+  position:fixed;inset:0;z-index:0;
+  background:radial-gradient(ellipse 80% 60% at 20% 20%,rgba(255,107,107,0.18) 0%,transparent 60%),
+             radial-gradient(ellipse 60% 50% at 80% 80%,rgba(120,80,255,0.18) 0%,transparent 60%),
+             radial-gradient(ellipse 50% 40% at 50% 50%,rgba(255,169,77,0.08) 0%,transparent 70%),
+             #060612;
+}
+.orb{
+  position:fixed;border-radius:50%;filter:blur(80px);opacity:0.4;z-index:0;pointer-events:none;
+  animation:float 8s ease-in-out infinite;
+}
+.orb1{width:400px;height:400px;background:rgba(255,107,107,0.3);top:-100px;left:-100px;animation-delay:0s;}
+.orb2{width:300px;height:300px;background:rgba(120,80,255,0.3);bottom:-80px;right:-80px;animation-delay:-3s;}
+.orb3{width:200px;height:200px;background:rgba(255,169,77,0.25);top:50%;left:60%;animation-delay:-5s;}
+@keyframes float{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-30px) scale(1.05);}}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:14px 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(6,6,18,0.55);
+  backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);
+  border-bottom:1px solid rgba(255,255,255,0.1);
+  box-shadow:0 1px 0 rgba(255,255,255,0.04);
+}
+.nav-logo-wrap{display:flex;flex-direction:column;gap:1px;text-decoration:none;}
+.nav-logo{
+  font-size:1.3rem;font-weight:800;letter-spacing:-1px;
+  background:linear-gradient(135deg,#ff6b6b,#ffa94d);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  line-height:1.1;
+}
+.nav-tagline{font-size:0.58rem;color:rgba(255,255,255,0.3);letter-spacing:1.5px;text-transform:uppercase;font-weight:400;}
+.nav-links{display:flex;gap:8px;}
+.nav-link{
+  padding:7px 16px;border-radius:20px;font-size:0.78rem;font-weight:500;
+  text-decoration:none;color:rgba(255,255,255,0.6);
+  transition:all 0.2s;border:1px solid transparent;
+  font-family:'Outfit',sans-serif;background:none;cursor:pointer;
+}
+.nav-link:hover{color:#fff;background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.12);}
+.nav-link.active{color:#fff;background:rgba(255,107,107,0.15);border-color:rgba(255,107,107,0.3);}
+
+.wrap{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 20px 40px;}
+
+.logo{
+  font-size:clamp(3rem,10vw,5.5rem);
+  font-weight:800;
+  letter-spacing:-3px;
+  background:linear-gradient(135deg,#ff6b6b,#ffa94d,#ff6b6b);
+  background-size:200%;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:shimmer 3s linear infinite;
+  margin-bottom:8px;
+}
+@keyframes shimmer{0%{background-position:0%}100%{background-position:200%}}
+
+.tagline{
+  font-size:clamp(0.75rem,2.5vw,0.95rem);
+  color:var(--muted);
+  letter-spacing:4px;
+  text-transform:uppercase;
+  margin-bottom:60px;
+  font-weight:300;
+}
+
+.id-section{
+  background:var(--glass);
+  border:1px solid var(--glass-border);
+  border-radius:28px;
+  padding:36px 40px;
+  width:100%;max-width:420px;
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  margin-bottom:32px;
+  box-shadow:0 8px 40px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.1);
+}
+.id-label{font-size:0.72rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;}
+.id-input{
+  width:100%;padding:14px 18px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:14px;color:#fff;
+  font-size:1rem;font-family:'Outfit',sans-serif;
+  outline:none;transition:all 0.2s;margin-bottom:16px;
+}
+.id-input:focus{border-color:rgba(255,107,107,0.6);background:rgba(255,107,107,0.06);box-shadow:0 0 0 3px rgba(255,107,107,0.1);}
+.id-input::placeholder{color:rgba(255,255,255,0.25);}
+.err{color:#ff6b6b;font-size:0.78rem;margin-top:-8px;margin-bottom:10px;display:none;}
+
+.btn-primary{
+  width:100%;padding:16px;
+  background:linear-gradient(135deg,#ff6b6b,#ff4757);
+  border:none;border-radius:14px;
+  color:#fff;font-size:1rem;font-weight:600;
+  font-family:'Outfit',sans-serif;
+  cursor:pointer;transition:all 0.2s;
+  box-shadow:0 4px 20px rgba(255,107,107,0.4);
+  letter-spacing:0.5px;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(255,107,107,0.5);}
+.btn-primary:active{transform:translateY(0);}
+
+.nav-cards{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:12px;width:100%;max-width:420px;
+}
+.nav-card{
+  background:var(--glass);
+  border:1px solid var(--glass-border);
+  border-radius:20px;padding:20px;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  cursor:pointer;transition:all 0.25s;
+  text-align:center;text-decoration:none;color:#fff;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.2),inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.nav-card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.1);}
+.nav-card .icon{font-size:1.6rem;}
+.nav-card .label{font-size:0.82rem;font-weight:500;color:rgba(255,255,255,0.8);}
+.nav-card .desc{font-size:0.7rem;color:var(--muted);}
+
+/* FOOTER */
+footer{
+  position:relative;z-index:1;
+  padding:18px 24px;
+  text-align:center;
+  background:rgba(6,6,18,0.55);
+  backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);
+  border-top:1px solid rgba(255,255,255,0.1);
+  box-shadow:0 -1px 0 rgba(255,255,255,0.04);
+}
+.footer-inner{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.footer-name{
+  font-size:0.82rem;font-weight:600;
+  background:linear-gradient(135deg,#ff6b6b,#ffa94d);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.footer-meta{font-size:0.72rem;color:rgba(255,255,255,0.35);letter-spacing:0.3px;}
+.footer-copy{font-size:0.68rem;color:rgba(255,255,255,0.2);margin-top:2px;}
+
+@media(max-width:480px){
+  .id-section{padding:28px 24px;}
+  .nav-cards{gap:10px;}
+  .nav-card{padding:16px 12px;}
+}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<nav>
+  <a class="nav-logo-wrap" href="index.html">
+    <div class="nav-logo">AuraRank</div>
+    <div class="nav-tagline">Algorithm-Driven Aura Ranking</div>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link active" href="index.html">Home</a>
+    <a class="nav-link" href="rate.html">Rate</a>
+    <a class="nav-link" href="results.html">AuraIndex</a>
+    <a class="nav-link" href="developer.html">Developer</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="logo">AuraRank</div>
+  <div class="tagline">Algorithm-Driven Aura Ranking System</div>
+
+  <div class="id-section">
+    <div class="id-label">Participant ID</div>
+    <input class="id-input" id="pid" type="text" placeholder="Enter your ID (e.g. student_42)" onkeydown="if(event.key==='Enter')start()"/>
+    <div class="err" id="err">Please enter a participant ID</div>
+    <button class="btn-primary" onclick="start()">Start Rating →</button>
+  </div>
+
+  <div class="nav-cards">
+    <a class="nav-card" href="results.html">
+      <div class="icon">📊</div>
+      <div class="label">AuraIndex</div>
+      <div class="desc">View rankings</div>
+    </a>
+    <a class="nav-card" href="developer.html">
+      <div class="icon">👨‍💻</div>
+      <div class="label">Developer</div>
+      <div class="desc">About the creator</div>
+    </a>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-name">Hadiuzzaman Ome</div>
+    <div class="footer-meta">CSE, Daffodil International University</div>
+    <div class="footer-copy">© AuraRank</div>
+  </div>
+</footer>
+
+<script>
+function start(){
+  const pid=document.getElementById('pid').value.trim();
+  if(!pid){document.getElementById('err').style.display='block';return;}
+  document.getElementById('err').style.display='none';
+  localStorage.setItem('fr_current_pid',pid);
+  window.location.href='rate.html';
+}
+</script>
+</body>
+</html>

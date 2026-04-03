@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Rate — AuraRank</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --accent:#ff6b6b;
+  --glass:rgba(255,255,255,0.07);
+  --glass-border:rgba(255,255,255,0.15);
+}
+body{
+  min-height:100vh;background:#060612;
+  font-family:'Outfit',sans-serif;color:#fff;
+  overflow-x:hidden;
+}
+.bg{
+  position:fixed;inset:0;z-index:0;
+  background:radial-gradient(ellipse 80% 60% at 20% 20%,rgba(255,107,107,0.15) 0%,transparent 60%),
+             radial-gradient(ellipse 60% 50% at 80% 80%,rgba(120,80,255,0.15) 0%,transparent 60%),#060612;
+}
+.orb{position:fixed;border-radius:50%;filter:blur(80px);opacity:0.35;z-index:0;pointer-events:none;animation:float 8s ease-in-out infinite;}
+.orb1{width:350px;height:350px;background:rgba(255,107,107,0.3);top:-80px;left:-80px;}
+.orb2{width:250px;height:250px;background:rgba(120,80,255,0.3);bottom:-60px;right:-60px;animation-delay:-4s;}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-20px);}}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:14px 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(6,6,18,0.55);
+  backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);
+  border-bottom:1px solid rgba(255,255,255,0.1);
+  box-shadow:0 1px 0 rgba(255,255,255,0.04);
+}
+.nav-logo-wrap{display:flex;flex-direction:column;gap:1px;text-decoration:none;}
+.nav-logo{
+  font-size:1.3rem;font-weight:800;letter-spacing:-1px;
+  background:linear-gradient(135deg,#ff6b6b,#ffa94d);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  line-height:1.1;
+}
+.nav-tagline{font-size:0.58rem;color:rgba(255,255,255,0.3);letter-spacing:1.5px;text-transform:uppercase;font-weight:400;}
+.nav-links{display:flex;gap:8px;}
+.nav-link{
+  padding:7px 16px;border-radius:20px;font-size:0.78rem;font-weight:500;
+  text-decoration:none;color:rgba(255,255,255,0.6);
+  transition:all 0.2s;border:1px solid transparent;
+  font-family:'Outfit',sans-serif;background:none;cursor:pointer;
+}
+.nav-link:hover{color:#fff;background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.12);}
+.nav-link.active{color:#fff;background:rgba(255,107,107,0.15);border-color:rgba(255,107,107,0.3);}
+
+/* MAIN */
+.wrap{
+  position:relative;z-index:1;
+  min-height:100vh;padding-top:80px;
+  display:flex;flex-direction:column;align-items:center;
+  padding-bottom:40px;
+}
+
+/* PROGRESS */
+.progress-section{width:100%;max-width:480px;padding:20px 20px 0;}
+.progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.counter{font-size:1rem;font-weight:600;}
+.pid-badge{
+  font-size:0.72rem;color:rgba(255,255,255,0.5);
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:20px;padding:4px 12px;
+}
+.progress-bar{height:5px;background:rgba(255,255,255,0.08);border-radius:10px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#ff6b6b,#ffa94d);border-radius:10px;transition:width 0.5s ease;}
+
+/* IMAGE CARD */
+.img-section{width:100%;max-width:380px;padding:20px 20px 0;}
+.img-card{
+  background:var(--glass);
+  border:1px solid var(--glass-border);
+  border-radius:28px;overflow:hidden;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  box-shadow:0 20px 60px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.1);
+  position:relative;
+}
+.img-card img{
+  width:100%;height:420px;object-fit:cover;display:block;
+  transition:opacity 0.3s ease;
+}
+.img-card img.fade{opacity:0;}
+.img-overlay{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:24px 20px 16px;
+  background:linear-gradient(transparent,rgba(6,6,18,0.85));
+}
+.img-alias{font-size:0.82rem;color:rgba(255,255,255,0.5);letter-spacing:1px;}
+
+/* RATING */
+.rating-section{
+  width:100%;max-width:420px;padding:20px;
+  display:flex;flex-direction:column;align-items:center;
+}
+.rating-label{font-size:0.7rem;color:rgba(255,255,255,0.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;}
+
+.stars{display:flex;gap:6px;margin-bottom:12px;}
+.star{
+  font-size:clamp(1.6rem,5vw,2rem);cursor:pointer;
+  opacity:0.2;transition:opacity 0.1s,transform 0.15s;
+  user-select:none;-webkit-user-select:none;
+}
+.star.on{opacity:1;}
+.star.pulse{animation:pulse 0.3s ease;}
+@keyframes pulse{0%{transform:scale(1);}50%{transform:scale(1.4);}100%{transform:scale(1);}}
+
+.score-label{
+  font-size:0.85rem;color:rgba(255,255,255,0.5);
+  min-height:20px;margin-bottom:20px;transition:all 0.2s;
+}
+.score-label span{color:#ffa94d;font-weight:600;}
+
+/* AUTO ADVANCE INDICATOR */
+.auto-indicator{
+  display:flex;align-items:center;gap:8px;
+  font-size:0.72rem;color:rgba(255,255,255,0.3);
+  margin-bottom:12px;
+}
+.auto-dots{display:flex;gap:4px;}
+.auto-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:rgba(255,107,107,0.3);
+  transition:background 0.1s;
+}
+.auto-dot.active{background:#ff6b6b;}
+
+/* DONE SCREEN */
+.done-screen{
+  display:none;text-align:center;padding:60px 20px;
+  flex-direction:column;align-items:center;
+}
+.done-icon{font-size:4rem;margin-bottom:20px;animation:bounce 1s ease infinite alternate;}
+@keyframes bounce{from{transform:translateY(0);}to{transform:translateY(-10px);}}
+.done-screen h2{font-size:2rem;font-weight:800;margin-bottom:10px;}
+.done-screen p{color:rgba(255,255,255,0.5);margin-bottom:32px;line-height:1.7;}
+.done-btn{
+  padding:16px 48px;
+  background:linear-gradient(135deg,#ff6b6b,#ff4757);
+  border:none;border-radius:14px;color:#fff;
+  font-size:1rem;font-weight:600;font-family:'Outfit',sans-serif;
+  cursor:pointer;text-decoration:none;display:inline-block;
+  box-shadow:0 4px 20px rgba(255,107,107,0.4);
+  transition:all 0.2s;
+}
+.done-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(255,107,107,0.5);}
+
+@media(max-width:480px){
+  .img-card img{height:340px;}
+  .nav-links .nav-link span{display:none;}
+  .nav-link{padding:7px 10px;}
+}
+
+/* FOOTER */
+footer{
+  position:relative;z-index:1;
+  padding:18px 24px;
+  text-align:center;
+  background:rgba(6,6,18,0.55);
+  backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);
+  border-top:1px solid rgba(255,255,255,0.1);
+  box-shadow:0 -1px 0 rgba(255,255,255,0.04);
+}
+.footer-inner{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.footer-name{
+  font-size:0.82rem;font-weight:600;
+  background:linear-gradient(135deg,#ff6b6b,#ffa94d);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.footer-meta{font-size:0.72rem;color:rgba(255,255,255,0.35);letter-spacing:0.3px;}
+.footer-copy{font-size:0.68rem;color:rgba(255,255,255,0.2);margin-top:2px;}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<nav>
+  <a class="nav-logo-wrap" href="index.html">
+    <div class="nav-logo">AuraRank</div>
+    <div class="nav-tagline">Algorithm-Driven Aura Ranking</div>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link" href="index.html">Home</a>
+    <a class="nav-link active" href="rate.html">Rate</a>
+    <a class="nav-link" href="results.html">AuraIndex</a>
+    <a class="nav-link" href="developer.html">Developer</a>
+  </div>
+</nav>
+
+<div class="wrap" id="mainWrap">
+
+  <div class="progress-section">
+    <div class="progress-top">
+      <div class="counter" id="counter">Image 1 of 50</div>
+      <div class="pid-badge" id="pidBadge">—</div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="bar" style="width:0%"></div></div>
+  </div>
+
+  <div class="img-section">
+    <div class="img-card">
+      <img id="photo" src="" alt="Rate this person"/>
+      <div class="img-overlay">
+        <div class="img-alias" id="imgAlias">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rating-section">
+    <div class="rating-label">Tap to rate (1 – 10)</div>
+    <div class="stars" id="stars">
+      <span class="star" onclick="rate(1)">★</span>
+      <span class="star" onclick="rate(2)">★</span>
+      <span class="star" onclick="rate(3)">★</span>
+      <span class="star" onclick="rate(4)">★</span>
+      <span class="star" onclick="rate(5)">★</span>
+      <span class="star" onclick="rate(6)">★</span>
+      <span class="star" onclick="rate(7)">★</span>
+      <span class="star" onclick="rate(8)">★</span>
+      <span class="star" onclick="rate(9)">★</span>
+      <span class="star" onclick="rate(10)">★</span>
+    </div>
+    <div class="score-label" id="scoreLabel">Select a rating</div>
+    <div class="auto-indicator" id="autoInd" style="display:none">
+      <span>Moving next in</span>
+      <div class="auto-dots" id="dots">
+        <div class="auto-dot active" id="d0"></div>
+        <div class="auto-dot" id="d1"></div>
+        <div class="auto-dot" id="d2"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="done-screen" id="doneScreen">
+    <div class="done-icon">🎉</div>
+    <h2>All Done!</h2>
+    <p>You've rated all 50 images.<br/>Thank you for participating in this study.</p>
+    <a class="done-btn" href="results.html">View AuraIndex →</a>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-name">Hadiuzzaman Ome</div>
+    <div class="footer-meta">CSE, Daffodil International University</div>
+    <div class="footer-copy">© AuraRank</div>
+  </div>
+</footer>
+
+<script>
+const celebrities = [
+  { alias: "Person 01", images: ["celebrities/P01_1.png","celebrities/P01_2.png","celebrities/P01_3.png","celebrities/P01_4.png","celebrities/P01_5.png"] },
+  { alias: "Person 02", images: ["celebrities/P02_1.png","celebrities/P02_2.png","celebrities/P02_3.png","celebrities/P02_4.png","celebrities/P02_5.png"] },
+  { alias: "Person 03", images: ["celebrities/P03_1.png","celebrities/P03_2.png","celebrities/P03_3.png","celebrities/P03_4.png","celebrities/P03_5.png"] },
+  { alias: "Person 04", images: ["celebrities/P04_1.png","celebrities/P04_2.png","celebrities/P04_3.png","celebrities/P04_4.png","celebrities/P04_5.png"] },
+  { alias: "Person 05", images: ["celebrities/P05_1.png","celebrities/P05_2.png","celebrities/P05_3.png","celebrities/P05_4.png","celebrities/P05_5.png"] },
+  { alias: "Person 06", images: ["celebrities/P06_1.png","celebrities/P06_2.png","celebrities/P06_3.png","celebrities/P06_4.png","celebrities/P06_5.png"] },
+  { alias: "Person 07", images: ["celebrities/P07_1.png","celebrities/P07_2.png","celebrities/P07_3.png","celebrities/P07_4.png","celebrities/P07_5.png"] },
+  { alias: "Person 08", images: ["celebrities/P08_1.png","celebrities/P08_2.png","celebrities/P08_3.png","celebrities/P08_4.png","celebrities/P08_5.png"] },
+  { alias: "Person 09", images: ["celebrities/P09_1.png","celebrities/P09_2.png","celebrities/P09_3.png","celebrities/P09_4.png","celebrities/P09_5.png"] },
+  { alias: "Person 10", images: ["celebrities/P10_1.png","celebrities/P10_2.png","celebrities/P10_3.png","celebrities/P10_4.png","celebrities/P10_5.png"] },
+];
+// ─────────────────────────────────────────────────────────────────────────────
+
+const allImages = celebrities.flatMap(c =>
+  c.images.map((src,i) => ({ alias:c.alias, src, id:`${c.alias}-${i+1}` }))
+);
+
+function smartShuffle(arr){
+  let a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  for(let i=1;i<a.length;i++){
+    if(a[i].alias===a[i-1].alias){
+      for(let j=i+1;j<a.length;j++){if(a[j].alias!==a[i-1].alias){[a[i],a[j]]=[a[j],a[i]];break;}}
+    }
+  }
+  return a;
+}
+
+const pid = localStorage.getItem('fr_current_pid');
+if(!pid) window.location.href='index.html';
+
+document.getElementById('pidBadge').textContent = pid;
+
+// Load or create fresh state for this participant
+const storageKey = `fr_${pid}`;
+let state = null;
+try { state = JSON.parse(localStorage.getItem(storageKey)); } catch(e){}
+
+// If state exists but all images are rated, keep it; otherwise create fresh
+if(!state || !state.shuffled || state.shuffled.length === 0){
+  state = { pid, shuffled: smartShuffle(allImages), ratings:{}, currentIndex:0 };
+  save();
+}
+
+const labels=['','Terrible','Poor','Below Average','Fair','Average','Above Average','Good','Very Good','Excellent','Perfect'];
+let selectedRating=0;
+let autoTimer=null;
+let dotStep=0;
+
+function save(){ localStorage.setItem(storageKey, JSON.stringify(state)); }
+
+function render(){
+  const idx=state.currentIndex;
+  const total=state.shuffled.length;
+  if(idx>=total){ showDone(); return; }
+
+  const img=state.shuffled[idx];
+  document.getElementById('counter').textContent=`Image ${idx+1} of ${total}`;
+  document.getElementById('bar').style.width=`${(idx/total)*100}%`;
+
+  const photo=document.getElementById('photo');
+  photo.classList.add('fade');
+  setTimeout(()=>{ photo.src=img.src; photo.onload=()=>photo.classList.remove('fade'); photo.onerror=()=>photo.classList.remove('fade'); },150);
+
+  document.getElementById('imgAlias').textContent=img.alias;
+  selectedRating=0;
+  document.getElementById('scoreLabel').innerHTML='Select a rating';
+  document.getElementById('autoInd').style.display='none';
+  document.querySelectorAll('.star').forEach(s=>s.classList.remove('on'));
+  clearTimer();
+}
+
+function rate(n){
+  if(autoTimer) return; // prevent re-rating during countdown
+  selectedRating=n;
+  const stars=document.querySelectorAll('.star');
+  stars.forEach((s,i)=>{
+    s.classList.toggle('on',i<n);
+    if(i===n-1){ s.classList.add('pulse'); setTimeout(()=>s.classList.remove('pulse'),300); }
+  });
+  document.getElementById('scoreLabel').innerHTML=`<span>${n}/10</span> — ${labels[n]}`;
+  startAutoAdvance();
+}
+
+function startAutoAdvance(){
+  document.getElementById('autoInd').style.display='flex';
+  dotStep=0;
+  updateDots();
+  autoTimer=setInterval(()=>{
+    dotStep++;
+    updateDots();
+    if(dotStep>=3){ clearTimer(); advance(); }
+  },400);
+}
+
+function updateDots(){
+  for(let i=0;i<3;i++){
+    document.getElementById(`d${i}`).classList.toggle('active',i<dotStep+1);
+  }
+}
+
+function clearTimer(){
+  if(autoTimer){ clearInterval(autoTimer); autoTimer=null; }
+}
+
+function advance(){
+  if(!selectedRating) return;
+  const img=state.shuffled[state.currentIndex];
+  state.ratings[img.id]=selectedRating;
+  state.currentIndex++;
+  save();
+  render();
+}
+
+function showDone(){
+  document.querySelector('.progress-section').style.display='none';
+  document.querySelector('.img-section').style.display='none';
+  document.querySelector('.rating-section').style.display='none';
+  const d=document.getElementById('doneScreen');
+  d.style.display='flex';
+}
+
+render();
+</script>
+</body>
+</html>
