@@ -112,9 +112,15 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 28px;
 .rank-list{display:flex;flex-direction:column;gap:8px;}
 .rank-row{
   background:var(--glass);border:1px solid var(--glass-b);border-radius:20px;padding:15px 20px;
-  display:grid;grid-template-columns:44px 1fr auto auto;align-items:center;gap:16px;
+  display:grid;grid-template-columns:44px 44px 1fr auto auto;align-items:center;gap:14px;
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transition:all 0.25s;cursor:default;
 }
+.rank-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,77,109,0.35);
+  background:rgba(255,255,255,0.07);flex-shrink:0;box-shadow:0 0 10px rgba(255,77,109,0.18);transition:all 0.25s;}
+.rank-row:hover .rank-avatar{border-color:rgba(255,77,109,0.7);box-shadow:0 0 16px rgba(255,77,109,0.4);transform:scale(1.08);}
+.rank-row.gold .rank-avatar{border-color:rgba(255,185,0,0.5);box-shadow:0 0 12px rgba(255,185,0,0.3);}
+.rank-row.silver .rank-avatar{border-color:rgba(180,180,220,0.45);}
+.rank-row.bronze .rank-avatar{border-color:rgba(205,130,55,0.45);}
 .rank-row:hover{transform:translateX(4px);border-color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);box-shadow:0 6px 24px rgba(0,0,0,0.22);}
 .rank-row.gold{border-color:rgba(255,185,0,0.3);background:rgba(255,185,0,0.05);}
 .rank-row.gold:hover{border-color:rgba(255,185,0,0.5);}
@@ -152,7 +158,8 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
 @media(max-width:620px){
   .stats{grid-template-columns:1fr 1fr;}
   .stats .stat:last-child{grid-column:1/-1;}
-  .rank-row{grid-template-columns:36px 1fr auto;gap:10px;}
+  .rank-row{grid-template-columns:36px 36px 1fr auto;gap:8px;}
+  .rank-avatar{width:34px;height:34px;}
   .rank-responses{display:none;}
   .chart-area{gap:5px;}
   nav{padding:12px 18px;}
@@ -274,9 +281,12 @@ if(participantCount===0){
     const cls=i===0?'gold':i===1?'silver':i===2?'bronze':'';
     const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`;
     const pct=(r.avg/10)*100;
+    const personNum=r.alias.split(' ')[1];
+    const avatarSrc=`celebrities/P${personNum}_1.png`;
     return `
       <div class="rank-row ${cls}">
         <div class="rank-badge">${medal}</div>
+        <img class="rank-avatar" src="${avatarSrc}" alt="${r.alias}" onerror="this.src='';this.style.background='rgba(255,77,109,0.2)';this.style.display='flex'"/>
         <div class="rank-info">
           <div class="rank-alias">${r.alias}</div>
           <div class="rank-bar-track"><div class="rank-bar-fill" style="width:0%" data-w="${pct.toFixed(1)}"></div></div>
