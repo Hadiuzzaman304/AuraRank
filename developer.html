@@ -37,6 +37,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 28px;
 .nav-link.active{color:#fff;background:rgba(255,77,109,0.18);border-color:rgba(255,77,109,0.35);box-shadow:0 0 14px rgba(255,77,109,0.15);}
 
 .wrap{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;padding:100px 20px 48px;}
+.main-layout{display:flex;flex-direction:row;align-items:center;gap:28px;width:100%;max-width:1200px;}
+.leader-col{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;}
+.codev-col{flex:1;display:flex;flex-direction:column;}
+@media(max-width:860px){.main-layout{flex-direction:column;align-items:center;}.leader-col,.codev-col{width:100%;max-width:480px;}}
 
 .page-eyebrow{font-size:0.65rem;letter-spacing:4px;text-transform:uppercase;color:rgba(255,154,60,0.7);font-weight:500;margin-bottom:10px;text-align:center;
   display:flex;align-items:center;justify-content:center;gap:10px;}
@@ -49,7 +53,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 28px;
 /* LEADER CARD */
 .leader-card{
   background:var(--glass);border:1px solid rgba(255,77,109,0.25);border-radius:32px;
-  padding:44px 40px;width:100%;max-width:480px;text-align:center;
+  padding:44px 40px;width:100%;max-width:380px;text-align:center;
   backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);
   box-shadow:0 32px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(255,77,109,0.08),inset 0 1px 0 rgba(255,255,255,0.1);
   animation:fadeUp 0.5s cubic-bezier(0.34,1.2,0.64,1) both;
@@ -94,12 +98,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 28px;
 
 /* SECTION DIVIDER */
 .section-eyebrow{font-size:0.65rem;letter-spacing:3.5px;text-transform:uppercase;color:rgba(255,255,255,0.25);font-weight:500;
-  margin:44px 0 22px;width:100%;max-width:900px;text-align:center;
+  margin:0 0 18px;width:100%;text-align:center;
   display:flex;align-items:center;gap:14px;}
 .section-eyebrow::before,.section-eyebrow::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.07);}
 
 /* CO-DEV GRID */
-.codev-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;width:100%;max-width:900px;}
+.codev-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;width:100%;}
 
 .codev-card{
   background:var(--glass);border:1px solid var(--glass-b);border-radius:26px;
@@ -223,7 +227,11 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   <div class="page-title">Development Team</div>
   <div class="page-sub">CSE316 · Artificial Intelligence · Daffodil International University</div>
 
-  <!-- PROJECT LEADER -->
+  <!-- MAIN SIDE-BY-SIDE LAYOUT -->
+  <div class="main-layout">
+
+  <!-- LEFT: PROJECT LEADER -->
+  <div class="leader-col">
   <div class="leader-card">
     <div class="leader-badge">⭐ Project Leader</div>
     <div class="avatar-wrap">
@@ -258,6 +266,10 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
     </div>
     <div class="quote">"Designing systems where logic meets intuition."</div>
   </div>
+  </div><!-- end leader-col -->
+
+  <!-- RIGHT: CO-DEVELOPERS -->
+  <div class="codev-col">
 
   <!-- SECTION DIVIDER -->
   <div class="section-eyebrow">Co-Developers</div>
@@ -329,7 +341,9 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
       </div>
     </div>
 
-  </div>
+  </div><!-- end codev-grid -->
+  </div><!-- end codev-col -->
+  </div><!-- end main-layout -->
 </div>
 
 <footer>
