@@ -147,6 +147,21 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 28px;
 .no-data h3{font-family:'DM Serif Display',serif;font-size:1.6rem;font-weight:400;margin-bottom:10px;color:rgba(255,255,255,0.5);}
 .no-data p{font-size:0.85rem;line-height:1.7;}
 
+/* STUDY PROGRESS BAR */
+.study-progress{width:100%;margin-bottom:28px;
+  background:var(--glass);border:1px solid var(--glass-b);border-radius:20px;
+  padding:18px 22px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  box-shadow:0 8px 32px rgba(0,0,0,0.25),inset 0 1px 0 rgba(255,255,255,0.07);}
+.sp-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.sp-label{font-size:0.67rem;color:rgba(255,255,255,0.38);letter-spacing:2.5px;text-transform:uppercase;font-weight:500;}
+.sp-count{font-size:0.82rem;font-weight:700;
+  background:linear-gradient(130deg,var(--red),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sp-bar{height:6px;background:rgba(255,255,255,0.06);border-radius:10px;overflow:hidden;}
+.sp-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--orange));border-radius:10px;
+  transition:width 0.9s cubic-bezier(0.34,1,0.64,1);box-shadow:0 0 10px rgba(255,77,109,0.45);}
+.sp-fill.done{background:linear-gradient(90deg,#28a745,#20c654);}
+.sp-sub{font-size:0.64rem;color:rgba(255,255,255,0.22);margin-top:8px;}
+
 footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   background:rgba(7,7,15,0.65);backdrop-filter:blur(28px) saturate(1.5);-webkit-backdrop-filter:blur(28px) saturate(1.5);
   border-top:1px solid rgba(255,255,255,0.08);}
@@ -191,6 +206,19 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
     <div class="page-title">AuraIndex</div>
     <div class="page-sub">Average Rating Distribution &amp; Rankings</div>
   </div>
+
+  <!-- Study Response Progress Bar -->
+  <div class="study-progress">
+    <div class="sp-top">
+      <div class="sp-label">Study Progress</div>
+      <div class="sp-count" id="spCount">0 / 30 Responses</div>
+    </div>
+    <div class="sp-bar">
+      <div class="sp-fill" id="spFill" style="width:0%"></div>
+    </div>
+    <div class="sp-sub" id="spSub">Collecting participant ratings — 30 responses needed</div>
+  </div>
+
   <div id="root"></div>
 </div>
 
@@ -208,6 +236,25 @@ function goRate(){
   if(pid){window.location.href='rate.html';}
   else{window.location.href='index.html';}
 }
+
+// Study progress bar
+const RESPONSE_LIMIT=30;
+function updateProgress(){
+  const total=Math.min(parseInt(localStorage.getItem('fr_total_responses')||'0',10),RESPONSE_LIMIT);
+  const pct=(total/RESPONSE_LIMIT)*100;
+  document.getElementById('spCount').textContent=`${total} / ${RESPONSE_LIMIT} Responses`;
+  const fill=document.getElementById('spFill');
+  fill.style.width=pct+'%';
+  if(total>=RESPONSE_LIMIT){
+    fill.classList.add('done');
+    document.getElementById('spSub').textContent='✓ All responses collected — study is complete';
+    document.getElementById('spSub').style.color='rgba(40,167,69,0.7)';
+  }else{
+    const remaining=RESPONSE_LIMIT-total;
+    document.getElementById('spSub').textContent=`${remaining} more response${remaining!==1?'s':''} needed to complete the study`;
+  }
+}
+updateProgress();
 
 const aliases=["Person 01","Person 02","Person 03","Person 04","Person 05","Person 06","Person 07","Person 08","Person 09","Person 10"];
 const totals={},counts={};
