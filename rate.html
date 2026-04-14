@@ -77,23 +77,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 28px;
 .star.pulse{animation:pulse 0.32s ease;}
 @keyframes pulse{0%{transform:scale(1);}50%{transform:scale(1.5);}100%{transform:scale(1);}}
 
-
-.star-numbers{
-  display:flex;
-  gap:2px;
-  justify-content:center;
-  font-size:0.65rem;
-  color:rgba(255,255,255,0.35);
-  margin-top:-10px;
-}
-
-
-.star-numbers span{
-  width:clamp(1.5rem,4.5vw,1.9rem);
-  text-align:center;
-}
-
-
+.star-numbers{display:flex;gap:2px;justify-content:center;font-size:0.65rem;color:rgba(255,255,255,0.35);margin-top:-10px;}
+.star-numbers span{width:clamp(1.5rem,4.5vw,1.9rem);text-align:center;}
 
 .score-label{font-size:0.85rem;color:rgba(255,255,255,0.45);min-height:20px;margin-top:16px;margin-bottom:18px;transition:all 0.2s;}
 .score-label span{color:var(--orange);font-weight:700;font-size:0.95rem;}
@@ -152,7 +137,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;margin-to
 <div class="wrap" id="mainWrap">
   <div class="progress-section">
     <div class="progress-top">
-      <div class="counter" id="counter">Image 1 of 50</div>
+      <div class="counter" id="counter">Image 1 of 10</div>
       <div class="pid-badge" id="pidBadge">—</div>
     </div>
     <div class="progress-bar"><div class="progress-fill" id="bar" style="width:0%"></div></div>
@@ -181,22 +166,10 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;margin-to
       <span class="star" onclick="rate(9)">★</span>
       <span class="star" onclick="rate(10)">★</span>
     </div>
-
-    
     <div class="star-numbers">
-  <span>1</span>
-  <span>2</span>
-  <span>3</span>
-  <span>4</span>
-  <span>5</span>
-  <span>6</span>
-  <span>7</span>
-  <span>8</span>
-  <span>9</span>
-  <span>10</span>
-</div>
-
-
+      <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+      <span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+    </div>
     <div class="score-label" id="scoreLabel">Select a rating</div>
     <div class="auto-indicator" id="autoInd" style="display:none">
       <span>Next in</span>
@@ -211,7 +184,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;margin-to
   <div class="done-screen" id="doneScreen">
     <div class="done-icon">🎉</div>
     <h2>All Done!</h2>
-    <p>You've rated all 50 images.<br/>Thank you for participating in this study.</p>
+    <p>You've rated all 10 people.<br/>Thank you for participating in this study.</p>
     <a class="done-btn" href="results.html">View AuraIndex →</a>
   </div>
 </div>
@@ -238,111 +211,122 @@ const celebrities = [
   { alias: "Person 10", images: ["celebrities/P10_1.png","celebrities/P10_2.png","celebrities/P10_3.png","celebrities/P10_4.png","celebrities/P10_5.png"] },
 ];
 
-const allImages = celebrities.flatMap(c =>
-  c.images.map((src,i) => ({ alias:c.alias, src, id:`${c.alias}-${i+1}` }))
-);
-
-function smartShuffle(arr){
-  let a=[...arr];
-  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
-  for(let i=1;i<a.length;i++){
-    if(a[i].alias===a[i-1].alias){
-      for(let j=i+1;j<a.length;j++){if(a[j].alias!==a[i-1].alias){[a[i],a[j]]=[a[j],a[i]];break;}}
-    }
+// Pick 1 random image per person → 10 images total, then shuffle
+function buildParticipantImages() {
+  const picked = celebrities.map(c => {
+    const src = c.images[Math.floor(Math.random() * c.images.length)];
+    return { alias: c.alias, src, id: `${c.alias}-px` };
+  });
+  // Fisher-Yates shuffle
+  for (let i = picked.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [picked[i], picked[j]] = [picked[j], picked[i]];
   }
-  return a;
+  return picked;
 }
 
 const pid = localStorage.getItem('fr_current_pid');
-if(!pid) window.location.href='index.html';
+if (!pid) window.location.href = 'index.html';
 
 document.getElementById('pidBadge').textContent = pid;
 
 const storageKey = `fr_${pid}`;
 let state = null;
-try { state = JSON.parse(localStorage.getItem(storageKey)); } catch(e){}
+try { state = JSON.parse(localStorage.getItem(storageKey)); } catch(e) {}
 
-if(!state || !state.shuffled || state.shuffled.length === 0){
-  state = { pid, shuffled: smartShuffle(allImages), ratings:{}, currentIndex:0 };
+// Reset if old 50-image session (shuffled.length > 10) or no valid state
+if (!state || !state.shuffled || state.shuffled.length !== 10) {
+  state = { pid, shuffled: buildParticipantImages(), ratings: {}, currentIndex: 0, counted: false };
   save();
 }
 
-const labels=['','Terrible','Poor','Below Average','Fair','Average','Above Average','Good','Very Good','Excellent','Perfect'];
-let selectedRating=0;
-let autoTimer=null;
-let dotStep=0;
+const labels = ['','Terrible','Poor','Below Average','Fair','Average','Above Average','Good','Very Good','Excellent','Perfect'];
+let selectedRating = 0;
+let autoTimer = null;
+let dotStep = 0;
 
-function save(){ localStorage.setItem(storageKey, JSON.stringify(state)); }
+function save() { localStorage.setItem(storageKey, JSON.stringify(state)); }
 
-function render(){
-  const idx=state.currentIndex;
-  const total=state.shuffled.length;
-  if(idx>=total){ showDone(); return; }
+function render() {
+  const idx = state.currentIndex;
+  const total = state.shuffled.length; // always 10
+  if (idx >= total) { showDone(); return; }
 
-  const img=state.shuffled[idx];
-  document.getElementById('counter').textContent=`Image ${idx+1} of ${total}`;
-  document.getElementById('bar').style.width=`${(idx/total)*100}%`;
+  const img = state.shuffled[idx];
+  document.getElementById('counter').textContent = `Image ${idx + 1} of ${total}`;
+  document.getElementById('bar').style.width = `${(idx / total) * 100}%`;
 
-  const photo=document.getElementById('photo');
+  const photo = document.getElementById('photo');
   photo.classList.add('fade');
-  setTimeout(()=>{ photo.src=img.src; photo.onload=()=>photo.classList.remove('fade'); photo.onerror=()=>photo.classList.remove('fade'); },150);
+  setTimeout(() => {
+    photo.src = img.src;
+    photo.onload = () => photo.classList.remove('fade');
+    photo.onerror = () => photo.classList.remove('fade');
+  }, 150);
 
-  document.getElementById('imgAlias').textContent=img.alias;
-  selectedRating=0;
-  document.getElementById('scoreLabel').innerHTML='Select a rating';
-  document.getElementById('autoInd').style.display='none';
-  document.querySelectorAll('.star').forEach(s=>s.classList.remove('on'));
+  document.getElementById('imgAlias').textContent = img.alias;
+  selectedRating = 0;
+  document.getElementById('scoreLabel').innerHTML = 'Select a rating';
+  document.getElementById('autoInd').style.display = 'none';
+  document.querySelectorAll('.star').forEach(s => s.classList.remove('on'));
   clearTimer();
 }
 
-function rate(n){
-  if(autoTimer) return;
-  selectedRating=n;
-  const stars=document.querySelectorAll('.star');
-  stars.forEach((s,i)=>{
-    s.classList.toggle('on',i<n);
-    if(i===n-1){ s.classList.add('pulse'); setTimeout(()=>s.classList.remove('pulse'),320); }
+function rate(n) {
+  if (autoTimer) return;
+  selectedRating = n;
+  const stars = document.querySelectorAll('.star');
+  stars.forEach((s, i) => {
+    s.classList.toggle('on', i < n);
+    if (i === n - 1) { s.classList.add('pulse'); setTimeout(() => s.classList.remove('pulse'), 320); }
   });
-  document.getElementById('scoreLabel').innerHTML=`<span>${n}/10</span> — ${labels[n]}`;
+  document.getElementById('scoreLabel').innerHTML = `<span>${n}/10</span> — ${labels[n]}`;
   startAutoAdvance();
 }
 
-function startAutoAdvance(){
-  document.getElementById('autoInd').style.display='flex';
-  dotStep=0;
+function startAutoAdvance() {
+  document.getElementById('autoInd').style.display = 'flex';
+  dotStep = 0;
   updateDots();
-  autoTimer=setInterval(()=>{
+  autoTimer = setInterval(() => {
     dotStep++;
     updateDots();
-    if(dotStep>=3){ clearTimer(); advance(); }
-  },150);
+    if (dotStep >= 3) { clearTimer(); advance(); }
+  }, 150);
 }
 
-function updateDots(){
-  for(let i=0;i<3;i++){
-    document.getElementById(`d${i}`).classList.toggle('active',i<dotStep+1);
+function updateDots() {
+  for (let i = 0; i < 3; i++) {
+    document.getElementById(`d${i}`).classList.toggle('active', i < dotStep + 1);
   }
 }
 
-function clearTimer(){
-  if(autoTimer){ clearInterval(autoTimer); autoTimer=null; }
+function clearTimer() {
+  if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
 }
 
-function advance(){
-  if(!selectedRating) return;
-  const img=state.shuffled[state.currentIndex];
-  state.ratings[img.id]=selectedRating;
+function advance() {
+  if (!selectedRating) return;
+  const img = state.shuffled[state.currentIndex];
+  state.ratings[img.id] = selectedRating;
   state.currentIndex++;
   save();
   render();
 }
 
-function showDone(){
-  document.querySelector('.progress-section').style.display='none';
-  document.querySelector('.img-section').style.display='none';
-  document.querySelector('.rating-section').style.display='none';
-  const d=document.getElementById('doneScreen');
-  d.style.display='flex';
+function showDone() {
+  // Count this participant's completion if not already counted
+  if (!state.counted) {
+    state.counted = true;
+    save();
+    const current = parseInt(localStorage.getItem('fr_total_responses') || '0', 10);
+    localStorage.setItem('fr_total_responses', String(current + 1));
+  }
+  document.querySelector('.progress-section').style.display = 'none';
+  document.querySelector('.img-section').style.display = 'none';
+  document.querySelector('.rating-section').style.display = 'none';
+  const d = document.getElementById('doneScreen');
+  d.style.display = 'flex';
 }
 
 render();

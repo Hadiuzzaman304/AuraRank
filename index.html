@@ -57,7 +57,22 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 28px;
 @keyframes shimmer{0%{background-position:0% 50%}100%{background-position:200% 50%}}
 
 .tagline{font-size:clamp(0.7rem,2vw,0.86rem);color:rgba(255,255,255,0.35);
-  letter-spacing:3.5px;text-transform:uppercase;margin-bottom:52px;font-weight:300;text-align:center;}
+  letter-spacing:3.5px;text-transform:uppercase;margin-bottom:36px;font-weight:300;text-align:center;}
+
+/* STUDY PROGRESS BAR */
+.study-progress{width:100%;max-width:420px;margin-bottom:20px;
+  background:var(--glass);border:1px solid var(--glass-b);border-radius:20px;
+  padding:18px 22px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  box-shadow:0 8px 32px rgba(0,0,0,0.25),inset 0 1px 0 rgba(255,255,255,0.07);}
+.sp-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.sp-label{font-size:0.67rem;color:rgba(255,255,255,0.38);letter-spacing:2.5px;text-transform:uppercase;font-weight:500;}
+.sp-count{font-size:0.82rem;font-weight:700;
+  background:linear-gradient(130deg,var(--red),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sp-bar{height:6px;background:rgba(255,255,255,0.06);border-radius:10px;overflow:hidden;}
+.sp-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--orange));border-radius:10px;
+  transition:width 0.7s cubic-bezier(0.34,1,0.64,1);box-shadow:0 0 10px rgba(255,77,109,0.45);}
+.sp-fill.done{background:linear-gradient(90deg,#28a745,#20c654);}
+.sp-sub{font-size:0.64rem;color:rgba(255,255,255,0.22);margin-top:8px;}
 
 .id-section{background:var(--glass);border:1px solid var(--glass-b);border-radius:28px;
   padding:34px 38px;width:100%;max-width:420px;
@@ -81,6 +96,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 28px;
 .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(255,77,109,0.52);}
 .btn-primary:hover::after{opacity:1;}
 .btn-primary:active{transform:translateY(1px);}
+.btn-primary:disabled{opacity:0.45;cursor:not-allowed;transform:none;box-shadow:none;}
 
 .nav-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:420px;}
 .nav-card{background:var(--glass);border:1px solid var(--glass-b);border-radius:22px;padding:22px 18px;
@@ -105,7 +121,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
 .footer-meta{font-size:0.7rem;color:rgba(255,255,255,0.3);}
 .footer-copy{font-size:0.65rem;color:rgba(255,255,255,0.16);margin-top:1px;}
 
-/* ID PROMPT MODAL */
+/* MODALS */
 .modal-bg{position:fixed;inset:0;z-index:300;background:rgba(7,7,15,0.82);
   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   display:none;align-items:center;justify-content:center;padding:20px;}
@@ -134,12 +150,20 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   transition:all 0.22s;box-shadow:0 4px 16px rgba(255,77,109,0.3);}
 .modal-confirm:hover{transform:translateY(-1px);box-shadow:0 7px 22px rgba(255,77,109,0.48);}
 
+/* LIMIT MODAL — special styling */
+.modal.limit-modal{border-color:rgba(255,77,109,0.25);}
+.limit-modal .modal-icon{font-size:3rem;}
+.limit-modal h3{background:linear-gradient(130deg,var(--red),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:1.25rem;}
+.limit-modal p{color:rgba(255,255,255,0.45);font-size:0.85rem;margin-bottom:26px;}
+.limit-modal .modal-confirm{flex:2;}
+
 @media(max-width:480px){
   .id-section{padding:28px 22px;}
   .nav-cards{gap:10px;}
   .nav-card{padding:18px 12px;}
   nav{padding:12px 18px;}
   .nav-tagline{display:none;}
+  .study-progress{padding:14px 18px;}
 }
 </style>
 </head>
@@ -168,6 +192,18 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   <div class="logo">AuraRank</div>
   <div class="tagline">Algorithm-Driven Aura Ranking System</div>
 
+  <!-- Study Response Progress Bar -->
+  <div class="study-progress">
+    <div class="sp-top">
+      <div class="sp-label">Study Progress</div>
+      <div class="sp-count" id="spCount">0 / 30 Responses</div>
+    </div>
+    <div class="sp-bar">
+      <div class="sp-fill" id="spFill" style="width:0%"></div>
+    </div>
+    <div class="sp-sub" id="spSub">Collecting participant ratings — 30 responses needed</div>
+  </div>
+
   <div class="id-section">
     <div class="id-label">Participant ID</div>
     <div class="id-input-wrap">
@@ -175,7 +211,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
       <input class="id-input" id="pid" type="text" placeholder="e.g. Last 3 digit of your Student ID" onkeydown="if(event.key==='Enter')start()"/>
     </div>
     <div class="err" id="err">Please enter a participant ID to continue</div>
-    <button class="btn-primary" onclick="start()">Begin Rating Session →</button>
+    <button class="btn-primary" id="startBtn" onclick="start()">Begin Rating Session →</button>
   </div>
 
   <div class="nav-cards">
@@ -200,7 +236,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   </div>
 </footer>
 
-<!-- ID Prompt Modal -->
+<!-- ID Prompt Modal (for nav Rate button) -->
 <div class="modal-bg" id="promptModal">
   <div class="modal">
     <div class="modal-icon">🪪</div>
@@ -218,35 +254,104 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   </div>
 </div>
 
+<!-- Response Limit Reached Modal -->
+<div class="modal-bg" id="limitModal">
+  <div class="modal limit-modal">
+    <div class="modal-icon">🔒</div>
+    <h3>Study Complete</h3>
+    <p>We've collected all <strong style="color:rgba(255,255,255,0.7)">30 responses</strong> needed for this study.<br/>No further submissions are being accepted.</p>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeLimitModal()">Close</button>
+      <a class="modal-confirm" href="results.html" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">View AuraIndex →</a>
+    </div>
+  </div>
+</div>
+
 <script>
+const RESPONSE_LIMIT = 30;
+
+// Read total responses
+function getTotalResponses() {
+  return parseInt(localStorage.getItem('fr_total_responses') || '0', 10);
+}
+
+// Update progress bar UI
+function updateProgress() {
+  const total = Math.min(getTotalResponses(), RESPONSE_LIMIT);
+  const pct = (total / RESPONSE_LIMIT) * 100;
+  document.getElementById('spCount').textContent = `${total} / ${RESPONSE_LIMIT} Responses`;
+  const fill = document.getElementById('spFill');
+  fill.style.width = pct + '%';
+  if (total >= RESPONSE_LIMIT) {
+    fill.classList.add('done');
+    document.getElementById('spSub').textContent = '✓ All responses collected — study is complete';
+    document.getElementById('spSub').style.color = 'rgba(40,167,69,0.7)';
+    // Disable the button
+    const btn = document.getElementById('startBtn');
+    btn.textContent = 'Study Complete — No More Submissions';
+    btn.disabled = true;
+  } else {
+    const remaining = RESPONSE_LIMIT - total;
+    document.getElementById('spSub').textContent = `${remaining} more response${remaining !== 1 ? 's' : ''} needed to complete the study`;
+  }
+}
+
 // Pre-fill if already have a saved ID
 const saved = localStorage.getItem('fr_current_pid');
-if(saved) document.getElementById('pid').value = saved;
+if (saved) document.getElementById('pid').value = saved;
 
-function start(){
-  const pid=document.getElementById('pid').value.trim();
-  if(!pid){document.getElementById('err').style.display='block';return;}
-  document.getElementById('err').style.display='none';
-  localStorage.setItem('fr_current_pid',pid);
-  window.location.href='rate.html';
+updateProgress();
+
+function isLimitReached() {
+  return getTotalResponses() >= RESPONSE_LIMIT;
 }
-function goRate(){
-  const pid=localStorage.getItem('fr_current_pid');
-  if(pid){window.location.href='rate.html';return;}
+
+function start() {
+  const pid = document.getElementById('pid').value.trim();
+  if (!pid) { document.getElementById('err').style.display = 'block'; return; }
+  document.getElementById('err').style.display = 'none';
+  if (isLimitReached()) {
+    document.getElementById('limitModal').classList.add('show');
+    return;
+  }
+  localStorage.setItem('fr_current_pid', pid);
+  window.location.href = 'rate.html';
+}
+
+function goRate() {
+  const pid = localStorage.getItem('fr_current_pid');
+  if (isLimitReached()) {
+    document.getElementById('limitModal').classList.add('show');
+    return;
+  }
+  if (pid) { window.location.href = 'rate.html'; return; }
   document.getElementById('promptModal').classList.add('show');
-  setTimeout(()=>document.getElementById('modalPid').focus(),120);
+  setTimeout(() => document.getElementById('modalPid').focus(), 120);
 }
-function closePrompt(){
+
+function closePrompt() {
   document.getElementById('promptModal').classList.remove('show');
-  document.getElementById('modalErr').textContent='';
+  document.getElementById('modalErr').textContent = '';
 }
-function modalStart(){
-  const pid=document.getElementById('modalPid').value.trim();
-  if(!pid){document.getElementById('modalErr').textContent='Please enter a participant ID.';return;}
-  localStorage.setItem('fr_current_pid',pid);
-  window.location.href='rate.html';
+
+function closeLimitModal() {
+  document.getElementById('limitModal').classList.remove('show');
 }
-document.getElementById('promptModal').addEventListener('click',function(e){if(e.target===this)closePrompt();});
+
+function modalStart() {
+  const pid = document.getElementById('modalPid').value.trim();
+  if (!pid) { document.getElementById('modalErr').textContent = 'Please enter a participant ID.'; return; }
+  if (isLimitReached()) {
+    closePrompt();
+    document.getElementById('limitModal').classList.add('show');
+    return;
+  }
+  localStorage.setItem('fr_current_pid', pid);
+  window.location.href = 'rate.html';
+}
+
+document.getElementById('promptModal').addEventListener('click', function(e) { if (e.target === this) closePrompt(); });
+document.getElementById('limitModal').addEventListener('click', function(e) { if (e.target === this) closeLimitModal(); });
 </script>
 </body>
 </html>
