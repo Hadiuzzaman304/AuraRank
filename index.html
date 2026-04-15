@@ -59,7 +59,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 28px;
 .tagline{font-size:clamp(0.7rem,2vw,0.86rem);color:rgba(255,255,255,0.35);
   letter-spacing:3.5px;text-transform:uppercase;margin-bottom:36px;font-weight:300;text-align:center;}
 
-/* STUDY PROGRESS BAR */
 .study-progress{width:100%;max-width:420px;margin-bottom:20px;
   background:var(--glass);border:1px solid var(--glass-b);border-radius:20px;
   padding:18px 22px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
@@ -112,6 +111,15 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 28px;
 .nav-card .label{font-size:0.84rem;font-weight:600;color:rgba(255,255,255,0.85);position:relative;z-index:1;}
 .nav-card .desc{font-size:0.7rem;color:rgba(255,255,255,0.36);position:relative;z-index:1;}
 
+/* Export PDF Button */
+.export-btn{width:100%;max-width:420px;margin-bottom:14px;
+  padding:13px;background:rgba(255,154,60,0.1);border:1px solid rgba(255,154,60,0.3);border-radius:14px;
+  color:rgba(255,154,60,0.9);font-size:0.88rem;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transition:all 0.22s;
+  display:flex;align-items:center;justify-content:center;gap:8px;}
+.export-btn:hover{background:rgba(255,154,60,0.18);border-color:rgba(255,154,60,0.5);color:var(--orange);transform:translateY(-1px);}
+.export-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+
 footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   background:rgba(7,7,15,0.65);backdrop-filter:blur(28px) saturate(1.5);-webkit-backdrop-filter:blur(28px) saturate(1.5);
   border-top:1px solid rgba(255,255,255,0.08);}
@@ -149,8 +157,6 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   color:#fff;font-size:0.88rem;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;
   transition:all 0.22s;box-shadow:0 4px 16px rgba(255,77,109,0.3);}
 .modal-confirm:hover{transform:translateY(-1px);box-shadow:0 7px 22px rgba(255,77,109,0.48);}
-
-/* LIMIT MODAL — special styling */
 .modal.limit-modal{border-color:rgba(255,77,109,0.25);}
 .limit-modal .modal-icon{font-size:3rem;}
 .limit-modal h3{background:linear-gradient(130deg,var(--red),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:1.25rem;}
@@ -195,12 +201,12 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   <div class="study-progress">
     <div class="sp-top">
       <div class="sp-label">Study Progress</div>
-      <div class="sp-count" id="spCount">Loading data...</div>
+      <div class="sp-count" id="spCount">0 / 30 Responses</div>
     </div>
     <div class="sp-bar">
       <div class="sp-fill" id="spFill" style="width:0%"></div>
     </div>
-    <div class="sp-sub" id="spSub">Syncing with cloud database...</div>
+    <div class="sp-sub" id="spSub">Collecting participant ratings — 30 responses needed</div>
   </div>
 
   <div class="id-section">
@@ -210,8 +216,11 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
       <input class="id-input" id="pid" type="text" placeholder="e.g. Last 3 digit of your Student ID" onkeydown="if(event.key==='Enter')start()"/>
     </div>
     <div class="err" id="err">Please enter a participant ID to continue</div>
-    <button class="btn-primary" id="startBtn" onclick="start()" disabled>Connecting...</button>
+    <button class="btn-primary" id="startBtn" onclick="start()">Begin Rating Session →</button>
   </div>
+
+  <!-- Export to PDF Button -->
+  <button class="export-btn" id="exportBtn" onclick="exportPDF()">📄 Export Data to PDF</button>
 
   <div class="nav-cards">
     <a class="nav-card" href="results.html">
@@ -235,6 +244,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   </div>
 </footer>
 
+<!-- ID Prompt Modal -->
 <div class="modal-bg" id="promptModal">
   <div class="modal">
     <div class="modal-icon">🪪</div>
@@ -252,6 +262,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   </div>
 </div>
 
+<!-- Response Limit Reached Modal -->
 <div class="modal-bg" id="limitModal">
   <div class="modal limit-modal">
     <div class="modal-icon">🔒</div>
@@ -264,38 +275,42 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   </div>
 </div>
 
-<script>
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  databaseURL: "https://aurarank-15-default-rtdb.asia-southeast1.firebasedatabase.app/"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
 const RESPONSE_LIMIT = 30;
-const FB_URL = 'https://aurarank-15-default-rtdb.asia-southeast1.firebasedatabase.app/responses.json';
-let totalResponses = 0;
+const ALIASES = ["Person 01","Person 02","Person 03","Person 04","Person 05","Person 06","Person 07","Person 08","Person 09","Person 10"];
 
-async function fetchCloudData() {
-  try {
-    const res = await fetch(FB_URL);
-    const data = await res.json();
-    totalResponses = data ? Object.keys(data).length : 0;
-  } catch(e) {
-    console.error("Firebase sync error:", e);
-  }
-  updateProgress();
-  const startBtn = document.getElementById('startBtn');
-  if (totalResponses < RESPONSE_LIMIT) {
-     startBtn.textContent = 'Begin Rating Session →';
-     startBtn.disabled = false;
-  }
-}
+// Expose globals for inline handlers
+window._db = db;
+window._ref = ref;
+window._get = get;
+window._set = set;
 
-function updateProgress() {
-  const total = Math.min(totalResponses, RESPONSE_LIMIT);
+// Listen to total responses count in real-time
+onValue(ref(db, 'meta/total_responses'), (snap) => {
+  const total = Math.min(snap.val() || 0, RESPONSE_LIMIT);
+  updateProgressUI(total);
+});
+
+function updateProgressUI(total) {
   const pct = (total / RESPONSE_LIMIT) * 100;
   document.getElementById('spCount').textContent = `${total} / ${RESPONSE_LIMIT} Responses`;
   const fill = document.getElementById('spFill');
   fill.style.width = pct + '%';
+  const btn = document.getElementById('startBtn');
   if (total >= RESPONSE_LIMIT) {
     fill.classList.add('done');
     document.getElementById('spSub').textContent = '✓ All responses collected — study is complete';
     document.getElementById('spSub').style.color = 'rgba(40,167,69,0.7)';
-    const btn = document.getElementById('startBtn');
     btn.textContent = 'Study Complete — No More Submissions';
     btn.disabled = true;
   } else {
@@ -304,61 +319,206 @@ function updateProgress() {
   }
 }
 
-const saved = localStorage.getItem('fr_current_pid');
-if (saved) document.getElementById('pid').value = saved;
-
-fetchCloudData(); // Sync on load
-
-function isLimitReached() {
-  return totalResponses >= RESPONSE_LIMIT;
+async function isLimitReached() {
+  const snap = await get(ref(db, 'meta/total_responses'));
+  return (snap.val() || 0) >= RESPONSE_LIMIT;
 }
 
-function start() {
+window.start = async function() {
   const pid = document.getElementById('pid').value.trim();
   if (!pid) { document.getElementById('err').style.display = 'block'; return; }
   document.getElementById('err').style.display = 'none';
-  if (isLimitReached()) {
+  if (await isLimitReached()) {
     document.getElementById('limitModal').classList.add('show');
     return;
   }
   localStorage.setItem('fr_current_pid', pid);
   window.location.href = 'rate.html';
-}
+};
 
-function goRate() {
+window.goRate = async function() {
   const pid = localStorage.getItem('fr_current_pid');
-  if (isLimitReached()) {
+  if (await isLimitReached()) {
     document.getElementById('limitModal').classList.add('show');
     return;
   }
   if (pid) { window.location.href = 'rate.html'; return; }
   document.getElementById('promptModal').classList.add('show');
   setTimeout(() => document.getElementById('modalPid').focus(), 120);
-}
+};
 
-function closePrompt() {
+window.closePrompt = function() {
   document.getElementById('promptModal').classList.remove('show');
   document.getElementById('modalErr').textContent = '';
-}
-
-function closeLimitModal() {
+};
+window.closeLimitModal = function() {
   document.getElementById('limitModal').classList.remove('show');
-}
+};
 
-function modalStart() {
+window.modalStart = async function() {
   const pid = document.getElementById('modalPid').value.trim();
   if (!pid) { document.getElementById('modalErr').textContent = 'Please enter a participant ID.'; return; }
-  if (isLimitReached()) {
+  if (await isLimitReached()) {
     closePrompt();
     document.getElementById('limitModal').classList.add('show');
     return;
   }
   localStorage.setItem('fr_current_pid', pid);
   window.location.href = 'rate.html';
-}
+};
 
-document.getElementById('promptModal').addEventListener('click', function(e) { if (e.target === this) closePrompt(); });
-document.getElementById('limitModal').addEventListener('click', function(e) { if (e.target === this) closeLimitModal(); });
+// --- EXPORT PDF ---
+window.exportPDF = async function() {
+  const btn = document.getElementById('exportBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Loading data...';
+
+  try {
+    // Fetch all responses from Firebase
+    const snap = await get(ref(db, 'responses'));
+    const allData = snap.val() || {};
+    const metaSnap = await get(ref(db, 'meta/total_responses'));
+    const totalResp = metaSnap.val() || 0;
+
+    // Build per-participant ratings: { pid: { alias: score, ... } }
+    const participants = {};
+    Object.entries(allData).forEach(([pid, pdata]) => {
+      if (!pdata || !pdata.ratings) return;
+      const row = {};
+      ALIASES.forEach(alias => {
+        // Find key that starts with alias
+        const key = Object.keys(pdata.ratings).find(k => k.startsWith(alias));
+        row[alias] = key ? pdata.ratings[key] : '—';
+      });
+      participants[pid] = row;
+    });
+
+    // Compute averages per alias
+    const totals = {}, counts = {};
+    ALIASES.forEach(a => { totals[a] = 0; counts[a] = 0; });
+    Object.values(participants).forEach(row => {
+      ALIASES.forEach(alias => {
+        const v = row[alias];
+        if (v !== '—' && v !== undefined) { totals[alias] += v; counts[alias]++; }
+      });
+    });
+
+    const pids = Object.keys(participants).sort();
+
+    // Build HTML for print
+    const cols = ALIASES.map(a => `<th>${a.replace('Person ','P')}</th>`).join('');
+    const rows = pids.map((pid, i) => {
+      const tds = ALIASES.map(a => {
+        const v = participants[pid][a];
+        return `<td>${v !== undefined ? v : '—'}</td>`;
+      }).join('');
+      return `<tr><td class="pid-cell">Participant ${i+1}<br/><span style="font-size:9px;opacity:0.6">${pid}</span></td>${tds}</tr>`;
+    }).join('');
+
+    const avgRow = ALIASES.map(a => {
+      const avg = counts[a] > 0 ? (totals[a]/counts[a]).toFixed(2) : '—';
+      return `<td class="avg-cell">${avg}</td>`;
+    }).join('');
+
+    // Team info for bottom
+    const team = [
+      {role:'Project Leader', name:'Hadiuzzaman Ome', id:'232-15-304', section:'65-H'},
+      {role:'Co-Developer', name:'Ahsanul Islam Faisal', id:'232-15-166', section:'—'},
+      {role:'Co-Developer', name:'Habibur Rahman', id:'232-15-297', section:'—'},
+      {role:'Co-Developer', name:'Shemanto Saha', id:'232-15-121', section:'—'},
+      {role:'Co-Developer', name:'Md Noyon Hossain', id:'232-15-156', section:'—'},
+    ];
+    const teamRows = team.map(m => `<tr><td>${m.role}</td><td>${m.name}</td><td>${m.id}</td><td>${m.section}</td></tr>`).join('');
+
+    const now = new Date().toLocaleString();
+
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+<title>AuraRank — Study Data Export</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#07070f;color:#fff;font-family:'Outfit',sans-serif;padding:40px 36px;min-height:100vh;}
+  .header{text-align:center;margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid rgba(255,255,255,0.1);}
+  .eyebrow{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:rgba(255,154,60,0.75);margin-bottom:8px;}
+  .title{font-family:'DM Serif Display',serif;font-size:38px;background:linear-gradient(140deg,#fff,#ff4d6d,#ff9a3c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-1px;margin-bottom:6px;}
+  .subtitle{font-size:12px;color:rgba(255,255,255,0.4);letter-spacing:2px;text-transform:uppercase;}
+  .meta{font-size:10px;color:rgba(255,255,255,0.25);margin-top:6px;}
+  .stats-row{display:flex;gap:14px;margin-bottom:28px;justify-content:center;}
+  .stat-box{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 22px;text-align:center;min-width:100px;}
+  .stat-val{font-size:22px;font-weight:900;background:linear-gradient(130deg,#ff4d6d,#ff9a3c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .stat-lbl{font-size:9px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:2px;margin-top:3px;}
+  .section-title{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:12px;padding-left:2px;}
+  table{width:100%;border-collapse:collapse;margin-bottom:32px;font-size:11px;}
+  th{background:rgba(255,77,109,0.12);color:rgba(255,255,255,0.6);font-weight:600;padding:9px 7px;text-align:center;border:1px solid rgba(255,255,255,0.07);font-size:10px;letter-spacing:0.5px;}
+  th:first-child{text-align:left;width:120px;}
+  td{padding:8px 7px;border:1px solid rgba(255,255,255,0.05);text-align:center;color:rgba(255,255,255,0.75);}
+  td:first-child{text-align:left;}
+  .pid-cell{color:rgba(255,255,255,0.85);font-weight:600;}
+  tr:nth-child(even) td{background:rgba(255,255,255,0.02);}
+  .avg-row td{background:rgba(255,154,60,0.08)!important;border-top:1px solid rgba(255,154,60,0.25);}
+  .avg-cell{color:#ff9a3c!important;font-weight:700;}
+  .avg-label{color:#ff9a3c!important;font-weight:700;}
+  .team-table th{background:rgba(124,92,191,0.12);}
+  .team-table td{color:rgba(255,255,255,0.7);}
+  .footer-note{text-align:center;font-size:10px;color:rgba(255,255,255,0.2);margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.07);}
+  @media print{body{padding:20px 24px;} .no-print{display:none;}}
+</style></head><body>
+<div class="header">
+  <div class="eyebrow">— Aura Rating Study —</div>
+  <div class="title">AuraRank</div>
+  <div class="subtitle">Algorithm-Driven Aura Ranking System</div>
+  <div class="meta">CSE316 · Artificial Intelligence · Daffodil International University · Exported: ${now}</div>
+</div>
+
+<div class="stats-row">
+  <div class="stat-box"><div class="stat-val">${pids.length}</div><div class="stat-lbl">Participants</div></div>
+  <div class="stat-box"><div class="stat-val">${totalResp}</div><div class="stat-lbl">Responses</div></div>
+  <div class="stat-box"><div class="stat-val">10</div><div class="stat-lbl">Persons Rated</div></div>
+  <div class="stat-box"><div class="stat-val">1–10</div><div class="stat-lbl">Score Range</div></div>
+</div>
+
+<div class="section-title">Rating Data Table</div>
+<table>
+  <thead><tr><th>Participant (ID)</th>${cols}</tr></thead>
+  <tbody>
+    ${rows || '<tr><td colspan="11" style="text-align:center;color:rgba(255,255,255,0.3);padding:20px">No data yet</td></tr>'}
+    <tr class="avg-row"><td class="avg-label">Average</td>${avgRow}</tr>
+  </tbody>
+</table>
+
+<div class="section-title">Development Team</div>
+<table class="team-table">
+  <thead><tr><th>Role</th><th>Name</th><th>Student ID</th><th>Section</th></tr></thead>
+  <tbody>${teamRows}</tbody>
+</table>
+
+<div style="text-align:center;margin:8px 0 16px;">
+  <div style="font-family:'DM Serif Display',serif;font-size:28px;background:linear-gradient(130deg,#ff4d6d,#ff9a3c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">AuraRank</div>
+  <div style="font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:3px;text-transform:uppercase;margin-top:4px;">Algorithm-Driven Aura Ranking</div>
+</div>
+
+<div class="footer-note">© AuraRank · Hadiuzzaman Ome & Team · CSE, Daffodil International University</div>
+<script>window.onload=()=>{window.print();}<\/script>
+</body></html>`;
+
+    const win = window.open('', '_blank');
+    win.document.write(html);
+    win.document.close();
+  } catch(e) {
+    alert('Failed to load data: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📄 Export Data to PDF';
+  }
+};
+
+document.getElementById('promptModal').addEventListener('click', function(e) { if (e.target === this) window.closePrompt(); });
+document.getElementById('limitModal').addEventListener('click', function(e) { if (e.target === this) window.closeLimitModal(); });
+
+// Pre-fill saved ID
+const saved = localStorage.getItem('fr_current_pid');
+if (saved) document.getElementById('pid').value = saved;
+
 </script>
 </body>
 </html>

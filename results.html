@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>AuraIndex — AuraRank</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{--red:#ff4d6d;--orange:#ff9a3c;--purple:#7c5cbf;--glass:rgba(255,255,255,0.055);--glass-b:rgba(255,255,255,0.13);--bg:#07070f;}
@@ -44,7 +42,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 28px;
   background:linear-gradient(130deg,var(--red),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 .page-sub{color:rgba(255,255,255,0.35);font-size:0.84rem;letter-spacing:0.5px;}
 
-/* STAT CARDS */
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:32px;}
 .stat{background:var(--glass);border:1px solid var(--glass-b);border-radius:22px;padding:22px 20px;text-align:center;
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transition:all 0.25s;cursor:default;
@@ -54,32 +51,42 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 28px;
   background:linear-gradient(130deg,var(--red),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 .stat-label{font-size:0.68rem;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:2px;margin-top:4px;font-weight:500;}
 
-/* BAR CHART */
 .chart-card{background:var(--glass);border:1px solid var(--glass-b);border-radius:26px;padding:28px;
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);margin-bottom:28px;
   box-shadow:0 4px 24px rgba(0,0,0,0.2),inset 0 1px 0 rgba(255,255,255,0.06);transition:all 0.25s;}
 .chart-card:hover{border-color:rgba(255,255,255,0.15);}
 .chart-title{font-size:0.72rem;font-weight:600;color:rgba(255,255,255,0.45);text-align:center;margin-bottom:28px;letter-spacing:2.5px;text-transform:uppercase;}
 .chart-area{display:flex;align-items:flex-end;justify-content:center;gap:clamp(6px,1.8vw,14px);padding:0 4px 0;}
-/* Each column: track at full column height, bar grows from bottom */
 .bar-col{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;min-width:0;max-width:68px;}
 .bar-outer{width:100%;position:relative;}
 .bar-track{position:absolute;inset:0;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:40px;}
-.bar{position:absolute;bottom:0;left:0;right:0;border-radius:40px;background:linear-gradient(0deg,rgba(124,92,191,0.85) 0%,var(--orange) 50%,var(--red) 100%);box-shadow:0 0 18px rgba(255,77,109,0.3),0 0 6px rgba(255,154,60,0.2);height:0;transition:height 1.1s cubic-bezier(0.34,1.2,0.64,1);cursor:pointer;}
-.bar::before{content:'';position:absolute;top:5px;left:5px;right:5px;height:28%;background:linear-gradient(180deg,rgba(255,255,255,0.22),transparent);border-radius:40px 40px 0 0;pointer-events:none;}
+.bar{position:absolute;bottom:0;left:0;right:0;border-radius:40px;
+  background:linear-gradient(0deg,rgba(124,92,191,0.85) 0%,var(--orange) 50%,var(--red) 100%);
+  box-shadow:0 0 18px rgba(255,77,109,0.3),0 0 6px rgba(255,154,60,0.2);
+  height:0;transition:height 1.1s cubic-bezier(0.34,1.2,0.64,1);cursor:pointer;}
+.bar::before{content:'';position:absolute;top:5px;left:5px;right:5px;height:28%;
+  background:linear-gradient(180deg,rgba(255,255,255,0.22),transparent);
+  border-radius:40px 40px 0 0;pointer-events:none;}
 .bar:hover{box-shadow:0 0 28px rgba(255,77,109,0.55),0 0 10px rgba(255,154,60,0.35);filter:brightness(1.12);}
-.bar-avg{position:absolute;top:-24px;left:50%;transform:translateX(-50%);font-size:0.68rem;font-weight:700;color:var(--orange);white-space:nowrap;text-shadow:0 0 10px rgba(255,154,60,0.7);opacity:0;transition:opacity 0.4s 0.8s;}
+.bar-avg{position:absolute;top:-24px;left:50%;transform:translateX(-50%);
+  font-size:0.68rem;font-weight:700;color:var(--orange);white-space:nowrap;
+  text-shadow:0 0 10px rgba(255,154,60,0.7);opacity:0;transition:opacity 0.4s 0.8s;}
 .bar-avg.visible{opacity:1;}
-.bar-avatar{width:clamp(26px,4.5vw,38px);height:clamp(26px,4.5vw,38px);border-radius:50%;object-fit:cover;border:2px solid rgba(255,77,109,0.4);background:rgba(255,255,255,0.07);flex-shrink:0;box-shadow:0 0 10px rgba(255,77,109,0.2);transition:all 0.25s;}
+.bar-avatar{width:clamp(26px,4.5vw,38px);height:clamp(26px,4.5vw,38px);
+  border-radius:50%;object-fit:cover;border:2px solid rgba(255,77,109,0.4);background:rgba(255,255,255,0.07);flex-shrink:0;
+  box-shadow:0 0 10px rgba(255,77,109,0.2);transition:all 0.25s;}
 .bar-col:hover .bar-avatar{border-color:rgba(255,77,109,0.8);box-shadow:0 0 16px rgba(255,77,109,0.45);transform:scale(1.1);}
 .bar-name{font-size:clamp(0.5rem,1.3vw,0.64rem);color:rgba(255,255,255,0.4);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;transition:color 0.2s;}
 .bar-col:hover .bar-name{color:rgba(255,255,255,0.75);}
 
-/* RANKINGS */
 .section-title{font-size:0.72rem;font-weight:600;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:2.5px;margin-bottom:14px;}
 .rank-list{display:flex;flex-direction:column;gap:8px;}
-.rank-row{background:var(--glass);border:1px solid var(--glass-b);border-radius:20px;padding:15px 20px;display:grid;grid-template-columns:44px 44px 1fr auto auto;align-items:center;gap:14px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transition:all 0.25s;cursor:default;}
-.rank-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,77,109,0.35);background:rgba(255,255,255,0.07);flex-shrink:0;box-shadow:0 0 10px rgba(255,77,109,0.18);transition:all 0.25s;}
+.rank-row{
+  background:var(--glass);border:1px solid var(--glass-b);border-radius:20px;padding:15px 20px;
+  display:grid;grid-template-columns:44px 44px 1fr auto auto;align-items:center;gap:14px;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transition:all 0.25s;cursor:default;}
+.rank-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,77,109,0.35);
+  background:rgba(255,255,255,0.07);flex-shrink:0;box-shadow:0 0 10px rgba(255,77,109,0.18);transition:all 0.25s;}
 .rank-row:hover .rank-avatar{border-color:rgba(255,77,109,0.7);box-shadow:0 0 16px rgba(255,77,109,0.4);transform:scale(1.08);}
 .rank-row.gold .rank-avatar{border-color:rgba(255,185,0,0.5);box-shadow:0 0 12px rgba(255,185,0,0.3);}
 .rank-row.silver .rank-avatar{border-color:rgba(180,180,220,0.45);}
@@ -89,24 +96,23 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 28px;
 .rank-row.gold:hover{border-color:rgba(255,185,0,0.5);}
 .rank-row.silver{border-color:rgba(180,180,220,0.22);}
 .rank-row.bronze{border-color:rgba(205,130,55,0.22);}
-
-.rank-badge{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:800;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.38);flex-shrink:0;}
+.rank-badge{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:0.85rem;font-weight:800;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.38);flex-shrink:0;}
 .rank-row.gold .rank-badge{background:rgba(255,185,0,0.18);color:#ffb700;}
 .rank-row.silver .rank-badge{background:rgba(180,180,220,0.14);color:#b4b4dc;}
 .rank-row.bronze .rank-badge{background:rgba(205,130,55,0.14);color:#cd7f32;}
-
 .rank-alias{font-size:0.92rem;font-weight:600;margin-bottom:7px;}
 .rank-bar-track{height:5px;background:rgba(255,255,255,0.07);border-radius:40px;overflow:hidden;}
-.rank-bar-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--orange));border-radius:40px;transition:width 1.3s cubic-bezier(0.34,1.4,0.64,1);box-shadow:0 0 8px rgba(255,77,109,0.45);}
-
+.rank-bar-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--orange));border-radius:40px;
+  transition:width 1.3s cubic-bezier(0.34,1.4,0.64,1);box-shadow:0 0 8px rgba(255,77,109,0.45);}
 .rank-responses{font-size:0.68rem;color:rgba(255,255,255,0.28);text-align:right;white-space:nowrap;}
-.rank-score{font-size:1.55rem;font-weight:900;letter-spacing:-0.5px;background:linear-gradient(130deg,var(--red),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:right;min-width:52px;}
-
+.rank-score{font-size:1.55rem;font-weight:900;letter-spacing:-0.5px;
+  background:linear-gradient(130deg,var(--red),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  text-align:right;min-width:52px;}
 .no-data{text-align:center;padding:80px 20px;color:rgba(255,255,255,0.25);}
 .no-data h3{font-family:'DM Serif Display',serif;font-size:1.6rem;font-weight:400;margin-bottom:10px;color:rgba(255,255,255,0.5);}
 .no-data p{font-size:0.85rem;line-height:1.7;}
 
-/* STUDY PROGRESS BAR */
 .study-progress{width:100%;margin-bottom:28px;
   background:var(--glass);border:1px solid var(--glass-b);border-radius:20px;
   padding:18px 22px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
@@ -120,13 +126,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 28px;
   transition:width 0.9s cubic-bezier(0.34,1,0.64,1);box-shadow:0 0 10px rgba(255,77,109,0.45);}
 .sp-fill.done{background:linear-gradient(90deg,#28a745,#20c654);}
 .sp-sub{font-size:0.64rem;color:rgba(255,255,255,0.22);margin-top:8px;}
-
-/* EXPORT BUTTON CSS */
-.admin-btn{position:fixed;bottom:24px;left:24px;z-index:200;padding:11px 18px;
-  background:rgba(255,154,60,0.1);border:1px solid rgba(255,154,60,0.3);border-radius:22px;
-  color:rgba(255,154,60,0.9);font-size:0.75rem;font-weight:600;font-family:'Outfit',sans-serif;
-  cursor:pointer;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transition:all 0.22s;}
-.admin-btn:hover{background:rgba(255,154,60,0.22);border-color:rgba(255,154,60,0.6);color:#fff;transform:translateY(-1px);}
 
 footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   background:rgba(7,7,15,0.65);backdrop-filter:blur(28px) saturate(1.5);-webkit-backdrop-filter:blur(28px) saturate(1.5);
@@ -176,15 +175,15 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   <div class="study-progress">
     <div class="sp-top">
       <div class="sp-label">Study Progress</div>
-      <div class="sp-count" id="spCount">Loading Data...</div>
+      <div class="sp-count" id="spCount">0 / 30 Responses</div>
     </div>
     <div class="sp-bar">
       <div class="sp-fill" id="spFill" style="width:0%"></div>
     </div>
-    <div class="sp-sub" id="spSub">Syncing with cloud database...</div>
+    <div class="sp-sub" id="spSub">Collecting participant ratings — 30 responses needed</div>
   </div>
 
-  <div id="root"><div class="no-data"><h3>Loading data...</h3></div></div>
+  <div id="root"><div class="no-data"><h3>Loading...</h3><p>Fetching data from the server.</p></div></div>
 </div>
 
 <footer>
@@ -195,41 +194,29 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   </div>
 </footer>
 
-<button class="admin-btn" onclick="exportPDF()">📄 Export to PDF</button>
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-<script>
-function goRate(){
-  const pid=localStorage.getItem('fr_current_pid');
-  if(pid){window.location.href='rate.html';}
-  else{window.location.href='index.html';}
-}
+const app = initializeApp({ databaseURL: "https://aurarank-15-default-rtdb.asia-southeast1.firebasedatabase.app/" });
+const db = getDatabase(app);
+
+window.goRate = function() {
+  const pid = localStorage.getItem('fr_current_pid');
+  if (pid) { window.location.href = 'rate.html'; } else { window.location.href = 'index.html'; }
+};
 
 const RESPONSE_LIMIT = 30;
-const FB_URL = 'https://aurarank-15-default-rtdb.asia-southeast1.firebasedatabase.app/responses.json';
-let globalRawData = null;
-
 const aliases = ["Person 01","Person 02","Person 03","Person 04","Person 05","Person 06","Person 07","Person 08","Person 09","Person 10"];
-const totals = {}, counts = {};
-aliases.forEach(a => { totals[a] = 0; counts[a] = 0; });
 
-async function loadResults() {
-  try {
-    const res = await fetch(FB_URL);
-    const data = await res.json();
-    globalRawData = data || {};
-    renderData(globalRawData);
-  } catch(e) {
-    document.getElementById('root').innerHTML = `<div class="no-data"><h3>Error Loading Data</h3><p>Could not connect to the cloud database.</p></div>`;
-  }
-}
-
-function updateProgress(totalCount) {
-  const total = Math.min(totalCount, RESPONSE_LIMIT);
+function updateProgressUI(total) {
+  total = Math.min(total, RESPONSE_LIMIT);
   const pct = (total / RESPONSE_LIMIT) * 100;
   document.getElementById('spCount').textContent = `${total} / ${RESPONSE_LIMIT} Responses`;
   const fill = document.getElementById('spFill');
   fill.style.width = pct + '%';
-  if(total >= RESPONSE_LIMIT) {
+  if (total >= RESPONSE_LIMIT) {
     fill.classList.add('done');
     document.getElementById('spSub').textContent = '✓ All responses collected — study is complete';
     document.getElementById('spSub').style.color = 'rgba(40,167,69,0.7)';
@@ -239,42 +226,44 @@ function updateProgress(totalCount) {
   }
 }
 
-function renderData(data) {
-  let participantCount = 0, totalRatings = 0;
-  
-  const entries = Object.values(data);
-  updateProgress(entries.length);
+function renderResults(allData, totalResp) {
+  updateProgressUI(totalResp || 0);
 
-  for (const entry of entries) {
-    if (!entry.ratings) continue;
+  const totals = {}, counts = {};
+  aliases.forEach(a => { totals[a] = 0; counts[a] = 0; });
+  let participantCount = 0, totalRatings = 0;
+
+  Object.values(allData || {}).forEach(pdata => {
+    if (!pdata || !pdata.ratings) return;
+    const entries = Object.entries(pdata.ratings);
+    if (entries.length === 0) return;
     participantCount++;
-    for (const [id, score] of Object.entries(entry.ratings)) {
+    for (const [id, score] of entries) {
       const alias = aliases.find(a => id.startsWith(a));
       if (alias) { totals[alias] += score; counts[alias]++; totalRatings++; }
     }
-  }
-
-  const results = aliases.map(alias => ({
-    alias, avg: counts[alias] > 0 ? totals[alias] / counts[alias] : 0, responses: counts[alias]
-  })).sort((a,b) => b.avg - a.avg);
+  });
 
   const root = document.getElementById('root');
 
   if (participantCount === 0) {
-    root.innerHTML = `<div class="no-data"><h3>No ratings yet</h3><p>Ratings will appear here after participants submit.<br/>Data is synced via cloud.</p></div>`;
+    root.innerHTML = `<div class="no-data"><h3>No ratings yet</h3><p>Ratings will appear here after participants submit.</p></div>`;
     return;
   }
 
-  const overallAvg = totalRatings > 0 ? (Object.values(totals).reduce((a,b) => a + b, 0) / totalRatings).toFixed(2) : '—';
+  const results = aliases.map(alias => ({
+    alias, avg: counts[alias] > 0 ? totals[alias] / counts[alias] : 0, responses: counts[alias]
+  })).sort((a, b) => b.avg - a.avg);
 
-  const statsHTML = `
-    <div class="stats">
-      <div class="stat"><div class="stat-val">${participantCount}</div><div class="stat-label">Participants</div></div>
-      <div class="stat"><div class="stat-val">${totalRatings}</div><div class="stat-label">Total Ratings</div></div>
-      <div class="stat"><div class="stat-val">${overallAvg}</div><div class="stat-label">Overall Avg</div></div>
-    </div>`;
+  const overallAvg = totalRatings > 0 ? (Object.values(totals).reduce((a, b) => a + b, 0) / totalRatings).toFixed(2) : '—';
 
-  const chartOrdered = [...results].sort((a,b) => b.avg - a.avg);
+  const statsHTML = `<div class="stats">
+    <div class="stat"><div class="stat-val">${participantCount}</div><div class="stat-label">Participants</div></div>
+    <div class="stat"><div class="stat-val">${totalRatings}</div><div class="stat-label">Total Ratings</div></div>
+    <div class="stat"><div class="stat-val">${overallAvg}</div><div class="stat-label">Overall Avg</div></div>
+  </div>`;
+
+  const chartOrdered = [...results].sort((a, b) => b.avg - a.avg);
   const maxAvg = Math.max(...chartOrdered.map(r => r.avg), 1);
   const MAX_PX = 200;
 
@@ -282,43 +271,40 @@ function renderData(data) {
     const colHeightPx = Math.round((r.avg / maxAvg) * MAX_PX);
     const personNum = r.alias.split(' ')[1];
     const avatarSrc = `celebrities/P${personNum}_1.png`;
-    const shortName = r.alias.replace('Person ','P');
-    return `
-      <div class="bar-col">
-        <div class="bar-outer" style="height:${colHeightPx}px">
-          <div class="bar-track"></div>
-          <div class="bar" data-h="100%" title="${r.alias}: ${r.avg.toFixed(2)}">
-            <div class="bar-avg">${r.avg > 0 ? r.avg.toFixed(1) : ''}</div>
-          </div>
+    const shortName = r.alias.replace('Person ', 'P');
+    return `<div class="bar-col">
+      <div class="bar-outer" style="height:${colHeightPx}px">
+        <div class="bar-track"></div>
+        <div class="bar" data-h="100%" title="${r.alias}: ${r.avg.toFixed(2)}">
+          <div class="bar-avg">${r.avg > 0 ? r.avg.toFixed(1) : ''}</div>
         </div>
-        <img class="bar-avatar" src="${avatarSrc}" alt="${r.alias}" onerror="this.style.background='rgba(255,77,109,0.2)'"/>
-        <div class="bar-name">${shortName}</div>
-      </div>`;
+      </div>
+      <img class="bar-avatar" src="${avatarSrc}" alt="${r.alias}" onerror="this.style.background='rgba(255,77,109,0.2)'"/>
+      <div class="bar-name">${shortName}</div>
+    </div>`;
   }).join('');
 
-  const chartHTML = `
-    <div class="chart-card">
-      <div class="chart-title">Average Rating Distribution</div>
-      <div class="chart-area">${bars}</div>
-    </div>`;
+  const chartHTML = `<div class="chart-card">
+    <div class="chart-title">Average Rating Distribution</div>
+    <div class="chart-area">${bars}</div>
+  </div>`;
 
-  const rows = results.map((r,i) => {
+  const rows = results.map((r, i) => {
     const cls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
     const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
     const pct = (r.avg / 10) * 100;
     const personNum = r.alias.split(' ')[1];
     const avatarSrc = `celebrities/P${personNum}_1.png`;
-    return `
-      <div class="rank-row ${cls}">
-        <div class="rank-badge">${medal}</div>
-        <img class="rank-avatar" src="${avatarSrc}" alt="${r.alias}" onerror="this.src='';this.style.background='rgba(255,77,109,0.2)';this.style.display='flex'"/>
-        <div class="rank-info">
-          <div class="rank-alias">${r.alias}</div>
-          <div class="rank-bar-track"><div class="rank-bar-fill" style="width:0%" data-w="${pct.toFixed(1)}"></div></div>
-        </div>
-        <div class="rank-responses">${r.responses} rating${r.responses !== 1 ? 's' : ''}</div>
-        <div class="rank-score">${r.avg > 0 ? r.avg.toFixed(2) : '—'}</div>
-      </div>`;
+    return `<div class="rank-row ${cls}">
+      <div class="rank-badge">${medal}</div>
+      <img class="rank-avatar" src="${avatarSrc}" alt="${r.alias}" onerror="this.src='';this.style.background='rgba(255,77,109,0.2)'"/>
+      <div class="rank-info">
+        <div class="rank-alias">${r.alias}</div>
+        <div class="rank-bar-track"><div class="rank-bar-fill" style="width:0%" data-w="${pct.toFixed(1)}"></div></div>
+      </div>
+      <div class="rank-responses">${r.responses} rating${r.responses !== 1 ? 's' : ''}</div>
+      <div class="rank-score">${r.avg > 0 ? r.avg.toFixed(2) : '—'}</div>
+    </div>`;
   }).join('');
 
   root.innerHTML = statsHTML + chartHTML + `<div class="section-title">Rankings</div><div class="rank-list">${rows}</div>`;
@@ -334,55 +320,11 @@ function renderData(data) {
   }, 120);
 }
 
-function exportPDF() {
-  if (!globalRawData || Object.keys(globalRawData).length === 0) {
-    alert("No data available to export.");
-    return;
-  }
-  
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF('landscape'); 
-
-  // Format headers based on your request
-  const head = [['Participant', 'Person 01', 'Person 02', 'Person 03', 'Person 04', 'Person 05', 'Person 06', 'Person 07', 'Person 08', 'Person 09', 'Person 10']];
-  const body = [];
-
-  let i = 1;
-  for (const key in globalRawData) {
-    const entry = globalRawData[key];
-    const row = [`Participant ${i} (ID: ${entry.pid || 'Unknown'})`];
-    const r = entry.ratings || {};
-    
-    // Fill in scores for each of the 10 people
-    for (let j = 1; j <= 10; j++) {
-      const personKey = `Person ${j.toString().padStart(2, '0')}-px`;
-      row.push(r[personKey] !== undefined ? r[personKey] : '-');
-    }
-    body.push(row);
-    i++;
-  }
-
-  // Generate the table
-  doc.autoTable({
-    head: head,
-    body: body,
-    theme: 'grid',
-    styles: { fontSize: 9, halign: 'center' },
-    columnStyles: { 0: { halign: 'left', cellWidth: 46 } },
-    headStyles: { fillColor: [255, 77, 109] }, // Matches your website's red theme
-    margin: { top: 20 },
-    didDrawPage: function (data) {
-      doc.setFontSize(14);
-      doc.setTextColor(40);
-      doc.text("AuraRank Complete Rating Results", data.settings.margin.left, 14);
-    }
-  });
-
-  // Trigger download
-  doc.save('AuraRank_Results.pdf');
-}
-
-loadResults(); // Load Firebase Data on start
+// Listen to Firebase in real-time
+onValue(ref(db, '/'), (snap) => {
+  const data = snap.val() || {};
+  renderResults(data.responses || {}, data.meta?.total_responses || 0);
+});
 </script>
 </body>
 </html>
