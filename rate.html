@@ -37,6 +37,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 28px;
 
 .wrap{position:relative;z-index:1;flex:1;padding-top:80px;display:flex;flex-direction:column;align-items:center;padding-bottom:0;}
 
+/* PROGRESS */
 .progress-section{width:100%;max-width:500px;padding:20px 20px 0;}
 .progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
 .counter{font-size:0.95rem;font-weight:700;color:rgba(255,255,255,0.85);}
@@ -48,6 +49,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 28px;
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--orange));border-radius:10px;transition:width 0.5s ease;
   box-shadow:0 0 8px rgba(255,77,109,0.5);}
 
+/* IMAGE CARD */
 .img-section{width:100%;max-width:380px;padding:16px 20px 0;}
 .img-card{background:var(--glass);border:1px solid var(--glass-b);border-radius:28px;overflow:hidden;
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
@@ -61,6 +63,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 28px;
   background:linear-gradient(transparent,rgba(7,7,15,0.88));}
 .img-alias{font-size:0.78rem;color:rgba(255,255,255,0.45);letter-spacing:1.5px;text-transform:uppercase;}
 
+/* RATING */
 .rating-section{width:100%;max-width:440px;padding:18px 20px;display:flex;flex-direction:column;align-items:center;}
 .rating-label{font-size:0.66rem;color:rgba(255,255,255,0.35);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:14px;}
 
@@ -85,6 +88,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 28px;
 .auto-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,77,109,0.25);transition:background 0.15s,transform 0.15s;}
 .auto-dot.active{background:var(--red);transform:scale(1.2);}
 
+/* DONE SCREEN */
 .done-screen{display:none;text-align:center;padding:60px 20px;flex-direction:column;align-items:center;}
 .done-icon{font-size:4rem;margin-bottom:20px;animation:bounce 1.2s ease infinite alternate;}
 @keyframes bounce{from{transform:translateY(0);}to{transform:translateY(-12px);}}
@@ -136,33 +140,31 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;margin-to
       <div class="counter" id="counter">Image 1 of 10</div>
       <div class="pid-badge" id="pidBadge">—</div>
     </div>
-    <div class="progress-bar">
-      <div class="progress-fill" id="bar" style="width:0%"></div>
-    </div>
+    <div class="progress-bar"><div class="progress-fill" id="bar" style="width:0%"></div></div>
   </div>
 
   <div class="img-section">
     <div class="img-card">
       <img id="photo" src="" alt="Rate this person"/>
       <div class="img-overlay">
-        <div class="img-alias" id="imgAlias"></div>
+        <div class="img-alias" id="imgAlias">Loading...</div>
       </div>
     </div>
   </div>
 
   <div class="rating-section">
-    <div class="rating-label">Rate the Aura — 1 to 10</div>
+    <div class="rating-label">Tap to rate (1 – 10)</div>
     <div class="stars" id="stars">
-      <span class="star" onclick="rate(1)">⭐</span>
-      <span class="star" onclick="rate(2)">⭐</span>
-      <span class="star" onclick="rate(3)">⭐</span>
-      <span class="star" onclick="rate(4)">⭐</span>
-      <span class="star" onclick="rate(5)">⭐</span>
-      <span class="star" onclick="rate(6)">⭐</span>
-      <span class="star" onclick="rate(7)">⭐</span>
-      <span class="star" onclick="rate(8)">⭐</span>
-      <span class="star" onclick="rate(9)">⭐</span>
-      <span class="star" onclick="rate(10)">⭐</span>
+      <span class="star" onclick="rate(1)">★</span>
+      <span class="star" onclick="rate(2)">★</span>
+      <span class="star" onclick="rate(3)">★</span>
+      <span class="star" onclick="rate(4)">★</span>
+      <span class="star" onclick="rate(5)">★</span>
+      <span class="star" onclick="rate(6)">★</span>
+      <span class="star" onclick="rate(7)">★</span>
+      <span class="star" onclick="rate(8)">★</span>
+      <span class="star" onclick="rate(9)">★</span>
+      <span class="star" onclick="rate(10)">★</span>
     </div>
     <div class="star-numbers">
       <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
@@ -170,9 +172,9 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;margin-to
     </div>
     <div class="score-label" id="scoreLabel">Select a rating</div>
     <div class="auto-indicator" id="autoInd" style="display:none">
-      <span>Auto-advancing</span>
-      <div class="auto-dots">
-        <div class="auto-dot" id="d0"></div>
+      <span>Next in</span>
+      <div class="auto-dots" id="dots">
+        <div class="auto-dot active" id="d0"></div>
         <div class="auto-dot" id="d1"></div>
         <div class="auto-dot" id="d2"></div>
       </div>
@@ -182,7 +184,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;margin-to
   <div class="done-screen" id="doneScreen">
     <div class="done-icon">🎉</div>
     <h2>All Done!</h2>
-    <p>Your ratings have been recorded.<br/>Thank you for participating in this study.</p>
+    <p>You've rated all 10 people.<br/>Thank you for participating in this study.</p>
     <a class="done-btn" href="results.html">View AuraIndex →</a>
   </div>
 </div>
@@ -195,13 +197,8 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;margin-to
   </div>
 </footer>
 
-<!-- Firebase SDK -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, get, set, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-const app = initializeApp({ databaseURL: "https://aurarank-15-default-rtdb.asia-southeast1.firebasedatabase.app/" });
-const db = getDatabase(app);
+<script>
+const FB_URL = 'https://aurarank-15-default-rtdb.asia-southeast1.firebasedatabase.app/responses.json';
 
 const celebrities = [
   { alias: "Person 01", images: ["celebrities/P01_1.png","celebrities/P01_2.png","celebrities/P01_3.png","celebrities/P01_4.png","celebrities/P01_5.png","celebrities/P01_6.png","celebrities/P01_7.png","celebrities/P01_8.png","celebrities/P01_9.png","celebrities/P01_10.png"] },
@@ -216,11 +213,13 @@ const celebrities = [
   { alias: "Person 10", images: ["celebrities/P10_1.png","celebrities/P10_2.png","celebrities/P10_3.png","celebrities/P10_4.png","celebrities/P10_5.png","celebrities/P10_6.png","celebrities/P10_7.png","celebrities/P10_8.png","celebrities/P10_9.png","celebrities/P10_10.png"] }
 ];
 
+// Pick 1 random image per person → 10 images total, then shuffle
 function buildParticipantImages() {
   const picked = celebrities.map(c => {
     const src = c.images[Math.floor(Math.random() * c.images.length)];
     return { alias: c.alias, src, id: `${c.alias}-px` };
   });
+  // Fisher-Yates shuffle
   for (let i = picked.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [picked[i], picked[j]] = [picked[j], picked[i]];
@@ -229,36 +228,17 @@ function buildParticipantImages() {
 }
 
 const pid = localStorage.getItem('fr_current_pid');
-if (!pid) { window.location.href = 'index.html'; }
+if (!pid) window.location.href = 'index.html';
 
 document.getElementById('pidBadge').textContent = pid;
 
 const storageKey = `fr_${pid}`;
-const fbKey = pid.replace(/[.#$\[\]]/g, '_'); // Firebase-safe key
 let state = null;
+try { state = JSON.parse(localStorage.getItem(storageKey)); } catch(e) {}
 
-// Load state: try Firebase first, fall back to localStorage
-async function loadState() {
-  try {
-    const snap = await get(ref(db, `responses/${fbKey}`));
-    if (snap.val() && snap.val().shuffled && snap.val().shuffled.length === 10) {
-      state = snap.val();
-      localStorage.setItem(storageKey, JSON.stringify(state));
-      return;
-    }
-  } catch(e) {}
-  try { state = JSON.parse(localStorage.getItem(storageKey)); } catch(e) {}
-  if (!state || !state.shuffled || state.shuffled.length !== 10) {
-    state = { pid, shuffled: buildParticipantImages(), ratings: {}, currentIndex: 0, counted: false };
-  }
-  await save();
-}
-
-async function save() {
-  localStorage.setItem(storageKey, JSON.stringify(state));
-  try {
-    await set(ref(db, `responses/${fbKey}`), state);
-  } catch(e) {}
+if (!state || !state.shuffled || state.shuffled.length !== 10) {
+  state = { pid, shuffled: buildParticipantImages(), ratings: {}, currentIndex: 0, counted: false };
+  save();
 }
 
 const labels = ['','Terrible','Poor','Below Average','Fair','Average','Above Average','Good','Very Good','Excellent','Perfect'];
@@ -266,13 +246,17 @@ let selectedRating = 0;
 let autoTimer = null;
 let dotStep = 0;
 
+function save() { localStorage.setItem(storageKey, JSON.stringify(state)); }
+
 function render() {
   const idx = state.currentIndex;
-  const total = state.shuffled.length;
+  const total = state.shuffled.length; 
   if (idx >= total) { showDone(); return; }
+
   const img = state.shuffled[idx];
   document.getElementById('counter').textContent = `Image ${idx + 1} of ${total}`;
   document.getElementById('bar').style.width = `${(idx / total) * 100}%`;
+
   const photo = document.getElementById('photo');
   photo.classList.add('fade');
   setTimeout(() => {
@@ -280,6 +264,7 @@ function render() {
     photo.onload = () => photo.classList.remove('fade');
     photo.onerror = () => photo.classList.remove('fade');
   }, 150);
+
   document.getElementById('imgAlias').textContent = img.alias;
   selectedRating = 0;
   document.getElementById('scoreLabel').innerHTML = 'Select a rating';
@@ -288,7 +273,7 @@ function render() {
   clearTimer();
 }
 
-window.rate = function(n) {
+function rate(n) {
   if (autoTimer) return;
   selectedRating = n;
   const stars = document.querySelectorAll('.star');
@@ -298,7 +283,7 @@ window.rate = function(n) {
   });
   document.getElementById('scoreLabel').innerHTML = `<span>${n}/10</span> — ${labels[n]}`;
   startAutoAdvance();
-};
+}
 
 function startAutoAdvance() {
   document.getElementById('autoInd').style.display = 'flex';
@@ -321,39 +306,42 @@ function clearTimer() {
   if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
 }
 
-async function advance() {
+function advance() {
   if (!selectedRating) return;
   const img = state.shuffled[state.currentIndex];
   state.ratings[img.id] = selectedRating;
   state.currentIndex++;
-  await save();
+  save();
   render();
 }
 
 async function showDone() {
   if (!state.counted) {
     state.counted = true;
-    await save();
-    // Increment total_responses counter in Firebase atomically
+    save();
+    
+    // Push the results to the Firebase Realtime Database
     try {
-      await runTransaction(ref(db, 'meta/total_responses'), (current) => (current || 0) + 1);
+      await fetch(FB_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pid: state.pid,
+          ratings: state.ratings,
+          timestamp: Date.now()
+        })
+      });
     } catch(e) {
-      // Fallback: read then write
-      const snap = await get(ref(db, 'meta/total_responses'));
-      await set(ref(db, 'meta/total_responses'), (snap.val() || 0) + 1);
+      console.error("Failed to push data to cloud:", e);
     }
-    // Also update localStorage for offline display
-    const cur = parseInt(localStorage.getItem('fr_total_responses') || '0', 10);
-    localStorage.setItem('fr_total_responses', String(cur + 1));
   }
   document.querySelector('.progress-section').style.display = 'none';
   document.querySelector('.img-section').style.display = 'none';
   document.querySelector('.rating-section').style.display = 'none';
-  document.getElementById('doneScreen').style.display = 'flex';
+  const d = document.getElementById('doneScreen');
+  d.style.display = 'flex';
 }
 
-// Init
-await loadState();
 render();
 </script>
 </body>
