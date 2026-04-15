@@ -97,7 +97,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 28px;
 .btn-primary:active{transform:translateY(1px);}
 .btn-primary:disabled{opacity:0.45;cursor:not-allowed;transform:none;box-shadow:none;}
 
-/* ACTION BUTTONS (Show/Export) replacing old export button */
+/* ACTION BUTTONS */
 .action-row{display:flex;gap:10px;margin-bottom:14px;width:100%;max-width:420px;flex-wrap:wrap;}
 .btn-action{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px;border-radius:14px;
   font-size:0.85rem;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;flex:1;
@@ -203,12 +203,12 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   <div class="study-progress">
     <div class="sp-top">
       <div class="sp-label">Study Progress</div>
-      <div class="sp-count" id="spCount">0 / 30 Responses</div>
+      <div class="sp-count" id="spCount">Loading Data...</div>
     </div>
     <div class="sp-bar">
       <div class="sp-fill" id="spFill" style="width:0%"></div>
     </div>
-    <div class="sp-sub" id="spSub">Collecting participant ratings — 30 responses needed</div>
+    <div class="sp-sub" id="spSub">Syncing with cloud database...</div>
   </div>
 
   <div class="id-section">
@@ -218,7 +218,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
       <input class="id-input" id="pid" type="text" placeholder="e.g. Last 3 digit of your Student ID" onkeydown="if(event.key==='Enter')start()"/>
     </div>
     <div class="err" id="err">Please enter a participant ID to continue</div>
-    <button class="btn-primary" id="startBtn" onclick="start()">Begin Rating Session →</button>
+    <button class="btn-primary" id="startBtn" onclick="start()" disabled>Connecting...</button>
   </div>
 
   <div class="action-row">
@@ -277,23 +277,21 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   </div>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-const firebaseConfig = {
-  databaseURL: "https://aurarank-15-default-rtdb.asia-southeast1.firebasedatabase.app/"
-};
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
+<script>
+const FB_URL = 'https://aurarank-15-default-rtdb.asia-southeast1.firebasedatabase.app/responses.json';
 const RESPONSE_LIMIT = 30;
+let totalResponses = 0;
 
-// Listen to total responses count in real-time
-onValue(ref(db, 'meta/total_responses'), (snap) => {
-  const total = Math.min(snap.val() || 0, RESPONSE_LIMIT);
-  updateProgressUI(total);
-});
+async function fetchCloudData() {
+  try {
+    const res = await fetch(FB_URL);
+    const data = await res.json();
+    totalResponses = data ? Object.keys(data).length : 0;
+  } catch(e) {
+    console.error("Firebase sync error:", e);
+  }
+  updateProgressUI(totalResponses);
+}
 
 function updateProgressUI(total) {
   const pct = (total / RESPONSE_LIMIT) * 100;
@@ -301,6 +299,7 @@ function updateProgressUI(total) {
   const fill = document.getElementById('spFill');
   fill.style.width = pct + '%';
   const btn = document.getElementById('startBtn');
+
   if (total >= RESPONSE_LIMIT) {
     fill.classList.add('done');
     document.getElementById('spSub').textContent = '✓ All responses collected — study is complete';
@@ -310,61 +309,67 @@ function updateProgressUI(total) {
   } else {
     const remaining = RESPONSE_LIMIT - total;
     document.getElementById('spSub').textContent = `${remaining} more response${remaining !== 1 ? 's' : ''} needed to complete the study`;
+    btn.textContent = 'Begin Rating Session →';
+    btn.disabled = false;
   }
 }
 
-async function isLimitReached() {
-  const snap = await get(ref(db, 'meta/total_responses'));
-  return (snap.val() || 0) >= RESPONSE_LIMIT;
+function isLimitReached() {
+  return totalResponses >= RESPONSE_LIMIT;
 }
 
-window.start = async function() {
+function start() {
   const pid = document.getElementById('pid').value.trim();
   if (!pid) { document.getElementById('err').style.display = 'block'; return; }
   document.getElementById('err').style.display = 'none';
-  if (await isLimitReached()) {
+  if (isLimitReached()) {
     document.getElementById('limitModal').classList.add('show');
     return;
   }
   localStorage.setItem('fr_current_pid', pid);
   window.location.href = 'rate.html';
-};
+}
 
-window.goRate = async function() {
+function goRate() {
   const pid = localStorage.getItem('fr_current_pid');
-  if (await isLimitReached()) {
+  if (isLimitReached()) {
     document.getElementById('limitModal').classList.add('show');
     return;
   }
   if (pid) { window.location.href = 'rate.html'; return; }
   document.getElementById('promptModal').classList.add('show');
   setTimeout(() => document.getElementById('modalPid').focus(), 120);
-};
+}
 
-window.closePrompt = function() {
+function closePrompt() {
   document.getElementById('promptModal').classList.remove('show');
   document.getElementById('modalErr').textContent = '';
-};
-window.closeLimitModal = function() {
-  document.getElementById('limitModal').classList.remove('show');
-};
+}
 
-window.modalStart = async function() {
+function closeLimitModal() {
+  document.getElementById('limitModal').classList.remove('show');
+}
+
+function modalStart() {
   const pid = document.getElementById('modalPid').value.trim();
   if (!pid) { document.getElementById('modalErr').textContent = 'Please enter a participant ID.'; return; }
-  if (await isLimitReached()) {
+  if (isLimitReached()) {
     closePrompt();
     document.getElementById('limitModal').classList.add('show');
     return;
   }
   localStorage.setItem('fr_current_pid', pid);
   window.location.href = 'rate.html';
-};
+}
+
+document.getElementById('promptModal').addEventListener('click', function(e) { if (e.target === this) closePrompt(); });
+document.getElementById('limitModal').addEventListener('click', function(e) { if (e.target === this) closeLimitModal(); });
 
 // Pre-fill saved ID
 const saved = localStorage.getItem('fr_current_pid');
 if (saved) document.getElementById('pid').value = saved;
 
+fetchCloudData(); // Sync on load
 </script>
 </body>
 </html>
