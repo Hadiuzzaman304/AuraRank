@@ -302,25 +302,23 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
     <div class="page-sub">Average Rating Distribution &amp; Rankings</div>
   </div>
 
-  <!-- Action Buttons -->
   <div class="action-row">
     <button class="btn-action btn-show" onclick="showResponses()">📋 Show Responses</button>
     <button class="btn-action btn-export" id="exportBtn" onclick="exportPDF()">⬇ Export to PDF</button>
   </div>
 
-  <!-- Study Progress Bar -->
   <div class="study-progress">
     <div class="sp-top">
       <div class="sp-label">Study Progress</div>
-      <div class="sp-count" id="spCount">0 / 30 Responses</div>
+      <div class="sp-count" id="spCount">Loading Data...</div>
     </div>
     <div class="sp-bar">
       <div class="sp-fill" id="spFill" style="width:0%"></div>
     </div>
-    <div class="sp-sub" id="spSub">Collecting participant ratings — 30 responses needed</div>
+    <div class="sp-sub" id="spSub">Syncing with cloud database...</div>
   </div>
 
-  <div id="root"></div>
+  <div id="root"><div class="no-data"><h3>Loading data...</h3></div></div>
 </div>
 
 <footer>
@@ -331,9 +329,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   </div>
 </footer>
 
-<!-- ══ SHOW RESPONSES MODAL ══ -->
 <div class="resp-modal-bg" id="respModal">
-  <!-- This entire #rptPanel is what gets screenshot for PDF -->
   <div id="rptPanel">
     <div class="rpt-close-strip">
       <button class="rpt-close-btn" onclick="closeResponses()">✕ Close</button>
@@ -353,7 +349,6 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
       <div class="rpt-stat-box"><div class="rpt-stat-val">1–10</div><div class="rpt-stat-label">Score Range</div></div>
     </div>
 
-    <!-- DEVELOPMENT TEAM (above data table) -->
     <div class="rpt-section-label">Development Team</div>
     <div class="rpt-tbl-wrap">
       <table class="rpt-tbl">
@@ -368,7 +363,6 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
       </table>
     </div>
 
-    <!-- RATING DATA TABLE (below developer table) -->
     <div class="rpt-section-label">Rating Data Table</div>
     <div class="rpt-tbl-wrap">
       <table class="rpt-data-tbl" id="rptDataTable">
@@ -401,7 +395,6 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   </div>
 </div>
 
-<!-- Libraries for dark PDF export -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -412,76 +405,105 @@ function goRate(){
   else{window.location.href='index.html';}
 }
 
-const RESPONSE_LIMIT=30;
-function updateProgress(){
-  const total=Math.min(parseInt(localStorage.getItem('fr_total_responses')||'0',10),RESPONSE_LIMIT);
-  const pct=(total/RESPONSE_LIMIT)*100;
-  document.getElementById('spCount').textContent=`${total} / ${RESPONSE_LIMIT} Responses`;
-  const fill=document.getElementById('spFill');
-  fill.style.width=pct+'%';
-  if(total>=RESPONSE_LIMIT){
+// ── Globals & Firebase Configuration ──
+const FB_URL = 'https://aurarank-15-default-rtdb.asia-southeast1.firebasedatabase.app/responses.json';
+const RESPONSE_LIMIT = 30;
+let globalRawData = null;
+let participantCount = 0;
+let totalRatings = 0;
+let allRows = [];
+const aliases = ["Person 01","Person 02","Person 03","Person 04","Person 05","Person 06","Person 07","Person 08","Person 09","Person 10"];
+let totals = {};
+let counts = {};
+
+// ── Fetch & Parse Data from Firebase ──
+async function loadData() {
+  try {
+    const res = await fetch(FB_URL);
+    globalRawData = (await res.json()) || {};
+  } catch(e) {
+    console.error("Firebase fetch error:", e);
+    globalRawData = {};
+  }
+  processData();
+  renderMain();
+}
+
+function processData() {
+  totals = {}; counts = {};
+  aliases.forEach(a => { totals[a] = 0; counts[a] = 0; });
+  allRows = [];
+  participantCount = 0;
+  totalRatings = 0;
+
+  const entries = Object.values(globalRawData);
+  updateProgress(entries.length);
+
+  entries.forEach(entry => {
+    if (!entry.ratings) return;
+    participantCount++;
+    const rowRatings = {};
+    for (const [id, score] of Object.entries(entry.ratings)) {
+      const alias = aliases.find(a => id.startsWith(a));
+      if (alias) {
+        totals[alias] += score;
+        counts[alias]++;
+        totalRatings++;
+        rowRatings[alias] = score;
+      }
+    }
+    allRows.push({ pid: entry.pid || 'Unknown', ratings: rowRatings });
+  });
+}
+
+function updateProgress(totalCount) {
+  const total = Math.min(totalCount, RESPONSE_LIMIT);
+  const pct = (total / RESPONSE_LIMIT) * 100;
+  document.getElementById('spCount').textContent = `${total} / ${RESPONSE_LIMIT} Responses`;
+  const fill = document.getElementById('spFill');
+  fill.style.width = pct + '%';
+  if(total >= RESPONSE_LIMIT) {
     fill.classList.add('done');
-    document.getElementById('spSub').textContent='✓ All responses collected — study is complete';
-    document.getElementById('spSub').style.color='rgba(40,167,69,0.7)';
-  }else{
-    const remaining=RESPONSE_LIMIT-total;
-    document.getElementById('spSub').textContent=`${remaining} more response${remaining!==1?'s':''} needed to complete the study`;
+    document.getElementById('spSub').textContent = '✓ All responses collected — study is complete';
+    document.getElementById('spSub').style.color = 'rgba(40,167,69,0.7)';
+  } else {
+    const remaining = RESPONSE_LIMIT - total;
+    document.getElementById('spSub').textContent = `${remaining} more response${remaining !== 1 ? 's' : ''} needed to complete the study`;
   }
 }
-updateProgress();
-
-// ── Parse localStorage data ──
-const aliases=["Person 01","Person 02","Person 03","Person 04","Person 05","Person 06","Person 07","Person 08","Person 09","Person 10"];
-const totals={},counts={};
-aliases.forEach(a=>{totals[a]=0;counts[a]=0;});
-const allRows=[];
-let participantCount=0,totalRatings=0;
-
-for(let i=0;i<localStorage.length;i++){
-  const key=localStorage.key(i);
-  if(!key||!key.startsWith('fr_')||key==='fr_current_pid'||key==='fr_total_responses') continue;
-  try{
-    const data=JSON.parse(localStorage.getItem(key));
-    if(!data||!data.ratings) continue;
-    const entries=Object.entries(data.ratings);
-    if(entries.length===0) continue;
-    participantCount++;
-    const rowRatings={};
-    for(const [id,score] of entries){
-      const alias=aliases.find(a=>id.startsWith(a));
-      if(alias){totals[alias]+=score;counts[alias]++;totalRatings++;rowRatings[alias]=score;}
-    }
-    allRows.push({pid:key.replace('fr_',''),ratings:rowRatings});
-  }catch(e){continue;}
-}
-
-const results=aliases.map(alias=>({
-  alias,avg:counts[alias]>0?totals[alias]/counts[alias]:0,responses:counts[alias]
-})).sort((a,b)=>b.avg-a.avg);
 
 // ── Render main chart/rankings ──
-const root=document.getElementById('root');
-if(participantCount===0){
-  root.innerHTML=`<div class="no-data"><h3>No ratings yet</h3><p>Ratings will appear here after participants submit.<br/>All participants must use the same browser/device.</p></div>`;
-}else{
-  const overallAvg=totalRatings>0?(Object.values(totals).reduce((a,b)=>a+b,0)/totalRatings).toFixed(2):'—';
-  const statsHTML=`<div class="stats">
+function renderMain() {
+  const root = document.getElementById('root');
+  
+  if (participantCount === 0) {
+    root.innerHTML = `<div class="no-data"><h3>No ratings yet</h3><p>Ratings will appear here after participants submit.<br/>Data is synced globally via the cloud.</p></div>`;
+    return;
+  }
+  
+  const results = aliases.map(alias => ({
+    alias, avg: counts[alias] > 0 ? totals[alias] / counts[alias] : 0, responses: counts[alias]
+  })).sort((a,b) => b.avg - a.avg);
+
+  const overallAvg = totalRatings > 0 ? (Object.values(totals).reduce((a,b) => a + b, 0) / totalRatings).toFixed(2) : '—';
+  const statsHTML = `<div class="stats">
     <div class="stat"><div class="stat-val">${participantCount}</div><div class="stat-label">Participants</div></div>
     <div class="stat"><div class="stat-val">${totalRatings}</div><div class="stat-label">Total Ratings</div></div>
     <div class="stat"><div class="stat-val">${overallAvg}</div><div class="stat-label">Overall Avg</div></div>
   </div>`;
 
-  const chartOrdered=[...results].sort((a,b)=>b.avg-a.avg);
-  const maxAvg=Math.max(...chartOrdered.map(r=>r.avg),1);
-  const MAX_PX=200;
-  const bars=chartOrdered.map(r=>{
-    const colH=Math.round((r.avg/maxAvg)*MAX_PX);
-    const num=r.alias.split(' ')[1];
+  const chartOrdered = [...results].sort((a,b) => b.avg - a.avg);
+  const maxAvg = Math.max(...chartOrdered.map(r => r.avg), 1);
+  const MAX_PX = 200;
+  
+  const bars = chartOrdered.map(r => {
+    const colH = Math.round((r.avg / maxAvg) * MAX_PX);
+    const num = r.alias.split(' ')[1];
     return `<div class="bar-col">
       <div class="bar-outer" style="height:${colH}px">
         <div class="bar-track"></div>
         <div class="bar" data-h="100%" title="${r.alias}: ${r.avg.toFixed(2)}">
-          <div class="bar-avg">${r.avg>0?r.avg.toFixed(1):''}</div>
+          <div class="bar-avg">${r.avg > 0 ? r.avg.toFixed(1) : ''}</div>
         </div>
       </div>
       <img class="bar-avatar" src="celebrities/P${num}_1.png" alt="${r.alias}" onerror="this.style.background='rgba(255,77,109,0.2)'"/>
@@ -489,11 +511,11 @@ if(participantCount===0){
     </div>`;
   }).join('');
 
-  const rankRows=results.map((r,i)=>{
-    const cls=i===0?'gold':i===1?'silver':i===2?'bronze':'';
-    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`;
-    const pct=(r.avg/10)*100;
-    const num=r.alias.split(' ')[1];
+  const rankRows = results.map((r,i) => {
+    const cls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`;
+    const pct = (r.avg / 10) * 100;
+    const num = r.alias.split(' ')[1];
     return `<div class="rank-row ${cls}">
       <div class="rank-badge">${medal}</div>
       <img class="rank-avatar" src="celebrities/P${num}_1.png" alt="${r.alias}" onerror="this.src='';this.style.background='rgba(255,77,109,0.2)'"/>
@@ -501,172 +523,167 @@ if(participantCount===0){
         <div class="rank-alias">${r.alias}</div>
         <div class="rank-bar-track"><div class="rank-bar-fill" style="width:0%" data-w="${pct.toFixed(1)}"></div></div>
       </div>
-      <div class="rank-responses">${r.responses} rating${r.responses!==1?'s':''}</div>
-      <div class="rank-score">${r.avg>0?r.avg.toFixed(2):'—'}</div>
+      <div class="rank-responses">${r.responses} rating${r.responses !== 1 ? 's' : ''}</div>
+      <div class="rank-score">${r.avg > 0 ? r.avg.toFixed(2) : '—'}</div>
     </div>`;
   }).join('');
 
-  root.innerHTML=statsHTML+`<div class="chart-card"><div class="chart-title">Average Rating Distribution</div><div class="chart-area">${bars}</div></div><div class="section-title">Rankings</div><div class="rank-list">${rankRows}</div>`;
+  root.innerHTML = statsHTML + `<div class="chart-card"><div class="chart-title">Average Rating Distribution</div><div class="chart-area">${bars}</div></div><div class="section-title">Rankings</div><div class="rank-list">${rankRows}</div>`;
 
-  setTimeout(()=>{
-    document.querySelectorAll('.bar').forEach(el=>{el.style.height='100%';el.querySelector('.bar-avg').classList.add('visible');});
-    document.querySelectorAll('.rank-bar-fill').forEach(el=>{el.style.width=el.dataset.w+'%';});
-  },120);
+  setTimeout(() => {
+    document.querySelectorAll('.bar').forEach(el => { el.style.height = '100%'; el.querySelector('.bar-avg').classList.add('visible'); });
+    document.querySelectorAll('.rank-bar-fill').forEach(el => { el.style.width = el.dataset.w + '%'; });
+  }, 120);
 }
 
 // ── Build data table for modal ──
-function buildDataTable(){
-  const tbody=document.getElementById('rptDataBody');
-  if(allRows.length===0){
-    tbody.innerHTML=`<tr><td colspan="11" class="rpt-no-data">No data yet</td></tr>`;
-  }else{
-    tbody.innerHTML=allRows.map(row=>{
-      const cells=aliases.map(a=>`<td>${row.ratings[a]!==undefined?row.ratings[a]:'—'}</td>`).join('');
-      return `<tr><td>${row.pid}</td>${cells}</tr>`;
+function buildDataTable() {
+  const tbody = document.getElementById('rptDataBody');
+  if (allRows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="11" class="rpt-no-data">No data yet</td></tr>`;
+  } else {
+    tbody.innerHTML = allRows.map((row, idx) => {
+      const cells = aliases.map(a => `<td>${row.ratings[a] !== undefined ? row.ratings[a] : '—'}</td>`).join('');
+      return `<tr><td>Participant ${idx + 1} (${row.pid})</td>${cells}</tr>`;
     }).join('');
   }
-  aliases.forEach((a,i)=>{
-    const el=document.getElementById('avg'+(String(i+1).padStart(2,'0')));
-    if(el) el.textContent=counts[a]>0?(totals[a]/counts[a]).toFixed(2):'—';
+  aliases.forEach((a, i) => {
+    const el = document.getElementById('avg' + (String(i + 1).padStart(2, '0')));
+    if (el) el.textContent = counts[a] > 0 ? (totals[a] / counts[a]).toFixed(2) : '—';
   });
 }
 
-function stampMeta(){
-  const now=new Date();
-  const ts=`${now.toLocaleDateString('en-US',{month:'numeric',day:'numeric',year:'2-digit'})}, ${now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}`;
-  document.getElementById('rptMeta').textContent=`CSE316 · Artificial Intelligence · Daffodil International University · Exported: ${ts}`;
-  document.getElementById('rptP').textContent=participantCount;
-  document.getElementById('rptR').textContent=totalRatings;
+function stampMeta() {
+  const now = new Date();
+  const ts = `${now.toLocaleDateString('en-US',{month:'numeric',day:'numeric',year:'2-digit'})}, ${now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}`;
+  document.getElementById('rptMeta').textContent = `CSE316 · Artificial Intelligence · Daffodil International University · Exported: ${ts}`;
+  document.getElementById('rptP').textContent = participantCount;
+  document.getElementById('rptR').textContent = totalRatings;
 }
 
 // ── Show Responses ──
-function showResponses(){
+function showResponses() {
   stampMeta();
   buildDataTable();
   document.getElementById('respModal').classList.add('show');
-  document.body.style.overflow='hidden';
+  document.body.style.overflow = 'hidden';
 }
 
-function closeResponses(){
+function closeResponses() {
   document.getElementById('respModal').classList.remove('show');
-  document.body.style.overflow='';
+  document.body.style.overflow = '';
 }
 
-document.getElementById('respModal').addEventListener('click',function(e){if(e.target===this)closeResponses();});
+document.getElementById('respModal').addEventListener('click', function(e) { if (e.target === this) closeResponses(); });
 
-// ── Export to PDF (captures dark UI) ──
-async function exportPDF(){
-  const btn=document.getElementById('exportBtn');
-  btn.disabled=true;
-  btn.textContent='⏳ Generating…';
+// ── Export to PDF (Fixed Canvas Logic) ──
+async function exportPDF() {
+  const btn = document.getElementById('exportBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generating…';
 
   stampMeta();
   buildDataTable();
 
   // Temporarily show the modal (hidden from user) so html2canvas can render it
-  const modal=document.getElementById('respModal');
-  const panel=document.getElementById('rptPanel');
-  const wasShown=modal.classList.contains('show');
+  const modal = document.getElementById('respModal');
+  const panel = document.getElementById('rptPanel');
+  const wasShown = modal.classList.contains('show');
 
   // Hide close button during capture
-  const closeStrip=panel.querySelector('.rpt-close-strip');
-  closeStrip.style.display='none';
+  const closeStrip = panel.querySelector('.rpt-close-strip');
+  closeStrip.style.display = 'none';
 
   // Make modal visible but off-screen for capture
-  modal.style.position='fixed';
-  modal.style.display='flex';
-  modal.style.visibility='hidden';
-  modal.style.pointerEvents='none';
-  document.body.style.overflow='hidden';
+  modal.style.position = 'fixed';
+  modal.style.display = 'flex';
+  modal.style.visibility = 'hidden';
+  modal.style.pointerEvents = 'none';
+  document.body.style.overflow = 'hidden';
 
-  await new Promise(r=>setTimeout(r,120));
+  await new Promise(r => setTimeout(r, 120));
 
-  try{
-    const canvas=await html2canvas(panel,{
-      backgroundColor:'#0a0a14',
-      scale:2,
-      useCORS:true,
-      allowTaint:true,
-      logging:false,
-      scrollX:0,
-      scrollY:0,
+  try {
+    const canvas = await html2canvas(panel, {
+      backgroundColor: '#0a0a14',
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      logging: false,
+      scrollX: 0,
+      scrollY: 0,
     });
 
-    const {jsPDF}=window.jspdf;
-    const imgW=210; // A4 mm
-    const imgH=(canvas.height/canvas.width)*imgW;
-    const pageH=297;
+    const { jsPDF } = window.jspdf;
+    const imgW = 210; // A4 width in mm
+    const imgH = (canvas.height / canvas.width) * imgW;
+    const pageH = 297; // A4 height in mm
 
-    const pdf=new jsPDF({
-      orientation:'portrait',
-      unit:'mm',
-      format:'a4',
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
     });
 
-    // Draw background color on every page first
-    let remainingH=imgH;
-    let page=0;
-    while(remainingH>0){
-      if(page>0) pdf.addPage();
-      pdf.setFillColor(10,10,20);
-      pdf.rect(0,0,imgW,pageH,'F');
-      pdf.addImage(imgData,'PNG',0,-(page*pageH),imgW,imgH);
-      remainingH-=pageH;
-      page++;
-    }
+    const imgData = canvas.toDataURL('image/png');
 
-    // Simpler single-draw approach that works reliably:
-    const imgData=canvas.toDataURL('image/png');
-    const pdf2=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-
-    if(imgH<=pageH){
-      pdf2.setFillColor(10,10,20);
-      pdf2.rect(0,0,imgW,pageH,'F');
-      pdf2.addImage(imgData,'PNG',0,0,imgW,imgH);
-    }else{
-      let yOffset=0;
-      let pageNum=0;
-      while(yOffset<imgH){
-        if(pageNum>0) pdf2.addPage();
-        pdf2.setFillColor(10,10,20);
-        pdf2.rect(0,0,imgW,pageH,'F');
-        // Calculate which slice of the image to show
-        const sliceRatio=yOffset/imgH;
-        const canvasSliceY=sliceRatio*canvas.height;
-        const canvasPageH=Math.min((pageH/imgH)*canvas.height, canvas.height-canvasSliceY);
-        // Create a slice canvas
-        const sliceCanvas=document.createElement('canvas');
-        sliceCanvas.width=canvas.width;
-        sliceCanvas.height=canvasPageH;
-        const ctx=sliceCanvas.getContext('2d');
-        ctx.drawImage(canvas,0,canvasSliceY,canvas.width,canvasPageH,0,0,canvas.width,canvasPageH);
-        const sliceData=sliceCanvas.toDataURL('image/png');
-        const sliceH=(canvasPageH/canvas.height)*imgH;
-        pdf2.addImage(sliceData,'PNG',0,0,imgW,sliceH);
-        yOffset+=pageH;
+    // If it fits on one page
+    if (imgH <= pageH) {
+      pdf.setFillColor(10, 10, 20);
+      pdf.rect(0, 0, imgW, pageH, 'F');
+      pdf.addImage(imgData, 'PNG', 0, 0, imgW, imgH);
+    } else {
+      // Slicing logic for multi-page export
+      let yOffset = 0;
+      let pageNum = 0;
+      while (yOffset < imgH) {
+        if (pageNum > 0) pdf.addPage();
+        pdf.setFillColor(10, 10, 20);
+        pdf.rect(0, 0, imgW, pageH, 'F');
+        
+        const sliceRatio = yOffset / imgH;
+        const canvasSliceY = sliceRatio * canvas.height;
+        const canvasPageH = Math.min((pageH / imgH) * canvas.height, canvas.height - canvasSliceY);
+        
+        const sliceCanvas = document.createElement('canvas');
+        sliceCanvas.width = canvas.width;
+        sliceCanvas.height = canvasPageH;
+        const ctx = sliceCanvas.getContext('2d');
+        ctx.drawImage(canvas, 0, canvasSliceY, canvas.width, canvasPageH, 0, 0, canvas.width, canvasPageH);
+        
+        const sliceData = sliceCanvas.toDataURL('image/png');
+        const sliceH = (canvasPageH / canvas.height) * imgH;
+        
+        pdf.addImage(sliceData, 'PNG', 0, 0, imgW, sliceH);
+        
+        yOffset += pageH;
         pageNum++;
       }
     }
 
-    const now=new Date();
-    pdf2.save(`AuraRank_Study_${now.toISOString().slice(0,10)}.pdf`);
-  }catch(err){
-    console.error('PDF export failed:',err);
+    const now = new Date();
+    pdf.save(`AuraRank_Study_${now.toISOString().slice(0, 10)}.pdf`);
+  } catch(err) {
+    console.error('PDF export failed:', err);
     alert('Export failed. Please try again.');
-  }finally{
-    closeStrip.style.display='';
-    modal.style.display='';
-    modal.style.visibility='';
-    modal.style.pointerEvents='';
-    modal.style.position='';
-    if(!wasShown){
+  } finally {
+    // Restore UI elements
+    closeStrip.style.display = '';
+    modal.style.display = '';
+    modal.style.visibility = '';
+    modal.style.pointerEvents = '';
+    modal.style.position = '';
+    if (!wasShown) {
       modal.classList.remove('show');
-      document.body.style.overflow='';
+      document.body.style.overflow = '';
     }
-    btn.disabled=false;
-    btn.textContent='⬇ Export to PDF';
+    btn.disabled = false;
+    btn.textContent = '⬇ Export to PDF';
   }
 }
+
+// Initial Data Load
+loadData();
 </script>
 </body>
 </html>
