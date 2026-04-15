@@ -585,7 +585,6 @@ async function exportPDF() {
   stampMeta();
   buildDataTable();
 
-  // Temporarily show the modal (hidden from user) so html2canvas can render it
   const modal = document.getElementById('respModal');
   const panel = document.getElementById('rptPanel');
   const wasShown = modal.classList.contains('show');
@@ -594,14 +593,13 @@ async function exportPDF() {
   const closeStrip = panel.querySelector('.rpt-close-strip');
   closeStrip.style.display = 'none';
 
-  // Make modal visible but off-screen for capture
-  modal.style.position = 'fixed';
-  modal.style.display = 'flex';
-  modal.style.visibility = 'hidden';
-  modal.style.pointerEvents = 'none';
-  document.body.style.overflow = 'hidden';
+  // Move offscreen but keep fully visible for html2canvas
+  // This absolutely guarantees html2canvas can read it without returning a black/blank canvas
+  const origStyle = modal.style.cssText;
+  modal.style.cssText = 'display: flex !important; position: absolute !important; left: -9999px !important; top: 0 !important; visibility: visible !important; opacity: 1 !important; z-index: -1 !important; width: 100vw; align-items: flex-start; padding: 20px;';
 
-  await new Promise(r => setTimeout(r, 120));
+  // Brief timeout to ensure the browser paints the changes
+  await new Promise(r => setTimeout(r, 300));
 
   try {
     const canvas = await html2canvas(panel, {
@@ -609,73 +607,65 @@ async function exportPDF() {
       scale: 2,
       useCORS: true,
       allowTaint: true,
-      logging: false,
-      scrollX: 0,
-      scrollY: 0,
+      logging: false
     });
 
     const { jsPDF } = window.jspdf;
-    const imgW = 210; // A4 width in mm
+    const imgW = 210; // A4 width mm
+    const pageH = 297; // A4 height mm
     const imgH = (canvas.height / canvas.width) * imgW;
-    const pageH = 297; // A4 height in mm
 
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4',
-    });
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    
+    // Switch to JPEG to avoid any transparent layer rendering issues
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
-    const imgData = canvas.toDataURL('image/png');
-
-    // If it fits on one page
     if (imgH <= pageH) {
       pdf.setFillColor(10, 10, 20);
       pdf.rect(0, 0, imgW, pageH, 'F');
-      pdf.addImage(imgData, 'PNG', 0, 0, imgW, imgH);
+      pdf.addImage(imgData, 'JPEG', 0, 0, imgW, imgH);
     } else {
-      // Slicing logic for multi-page export
       let yOffset = 0;
       let pageNum = 0;
-      while (yOffset < imgH) {
+      while (yOffset < canvas.height) {
         if (pageNum > 0) pdf.addPage();
         pdf.setFillColor(10, 10, 20);
         pdf.rect(0, 0, imgW, pageH, 'F');
-        
-        const sliceRatio = yOffset / imgH;
-        const canvasSliceY = sliceRatio * canvas.height;
-        const canvasPageH = Math.min((pageH / imgH) * canvas.height, canvas.height - canvasSliceY);
+
+        // Calculate pixel height for one A4 page
+        const pxPerPage = (pageH * canvas.width) / imgW;
+        const sliceH = Math.min(pxPerPage, canvas.height - yOffset);
         
         const sliceCanvas = document.createElement('canvas');
         sliceCanvas.width = canvas.width;
-        sliceCanvas.height = canvasPageH;
+        sliceCanvas.height = sliceH;
         const ctx = sliceCanvas.getContext('2d');
-        ctx.drawImage(canvas, 0, canvasSliceY, canvas.width, canvasPageH, 0, 0, canvas.width, canvasPageH);
         
-        const sliceData = sliceCanvas.toDataURL('image/png');
-        const sliceH = (canvasPageH / canvas.height) * imgH;
+        ctx.fillStyle = '#0a0a14';
+        ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+        ctx.drawImage(canvas, 0, yOffset, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
         
-        pdf.addImage(sliceData, 'PNG', 0, 0, imgW, sliceH);
+        const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.95);
+        const printH = (sliceH / canvas.width) * imgW;
         
-        yOffset += pageH;
+        pdf.addImage(sliceData, 'JPEG', 0, 0, imgW, printH);
+        
+        yOffset += sliceH;
         pageNum++;
       }
     }
 
     const now = new Date();
     pdf.save(`AuraRank_Study_${now.toISOString().slice(0, 10)}.pdf`);
-  } catch(err) {
+  } catch (err) {
     console.error('PDF export failed:', err);
     alert('Export failed. Please try again.');
   } finally {
-    // Restore UI elements
+    // Restore Original UI Flow
+    modal.style.cssText = origStyle;
     closeStrip.style.display = '';
-    modal.style.display = '';
-    modal.style.visibility = '';
-    modal.style.pointerEvents = '';
-    modal.style.position = '';
     if (!wasShown) {
       modal.classList.remove('show');
-      document.body.style.overflow = '';
     }
     btn.disabled = false;
     btn.textContent = '⬇ Export to PDF';
