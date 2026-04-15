@@ -227,10 +227,8 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   <div class="page-title">Development Team</div>
   <div class="page-sub">CSE316 · Artificial Intelligence · Daffodil International University</div>
 
-  <!-- MAIN SIDE-BY-SIDE LAYOUT -->
   <div class="main-layout">
 
-  <!-- LEFT: PROJECT LEADER -->
   <div class="leader-col">
   <div class="leader-card">
     <div class="leader-badge">⭐ Project Leader</div>
@@ -266,15 +264,10 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
     </div>
     <div class="quote">"Designing systems where logic meets intuition."</div>
   </div>
-  </div><!-- end leader-col -->
+  </div><div class="codev-col">
 
-  <!-- RIGHT: CO-DEVELOPERS -->
-  <div class="codev-col">
-
-  <!-- SECTION DIVIDER -->
   <div class="section-eyebrow">Co-Developers</div>
 
-  <!-- CO-DEV GRID -->
   <div class="codev-grid">
 
     <div class="codev-card">
@@ -341,10 +334,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
       </div>
     </div>
 
-  </div><!-- end codev-grid -->
-  </div><!-- end codev-col -->
-  </div><!-- end main-layout -->
-</div>
+  </div></div></div></div>
 
 <footer>
   <div class="footer-inner">
@@ -360,24 +350,26 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   <div class="modal">
     <div id="modalForm">
       <h3>Admin Access</h3>
-      <p>Enter the admin password to clear all rating data.</p>
+      <p>Enter the admin password to clear all rating data in the cloud.</p>
       <input type="password" id="adminPass" placeholder="••••••" onkeydown="if(event.key==='Enter')confirmClear()"/>
       <div class="modal-err" id="modalErr"></div>
       <div class="modal-btns">
         <button class="modal-cancel" onclick="closeAdmin()">Cancel</button>
-        <button class="modal-confirm" onclick="confirmClear()">Clear All Data</button>
+        <button class="modal-confirm" id="modalConfirmBtn" onclick="confirmClear()">Clear All Data</button>
       </div>
     </div>
     <div class="modal-success" id="modalSuccess">
       <div class="success-icon">✅</div>
       <h3>Data Cleared</h3>
-      <p>All rating data has been removed successfully.</p>
+      <p>All cloud rating data has been removed successfully.</p>
       <button class="modal-cancel" onclick="closeAdmin()" style="margin-top:8px">Close</button>
     </div>
   </div>
 </div>
 
 <script>
+const FB_URL = 'https://aurarank-15-default-rtdb.asia-southeast1.firebasedatabase.app/responses.json';
+
 function goRate(){
   const pid=localStorage.getItem('fr_current_pid');
   if(pid){window.location.href='rate.html';}else{window.location.href='index.html';}
@@ -386,12 +378,14 @@ function openAdmin(){
   document.getElementById('modalBg').classList.add('show');
   document.getElementById('adminPass').value='';
   document.getElementById('modalErr').textContent='';
+  document.getElementById('modalConfirmBtn').textContent='Clear All Data';
   document.getElementById('modalForm').style.display='block';
   document.getElementById('modalSuccess').style.display='none';
   setTimeout(()=>document.getElementById('adminPass').focus(),100);
 }
 function closeAdmin(){document.getElementById('modalBg').classList.remove('show');}
-function confirmClear(){
+
+async function confirmClear(){
   const pass=document.getElementById('adminPass').value;
   if(pass!=='leo15'){
     document.getElementById('modalErr').textContent='Incorrect password. Try again.';
@@ -399,12 +393,26 @@ function confirmClear(){
     document.getElementById('adminPass').focus();
     return;
   }
-  const keys=[];
-  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('fr_'))keys.push(k);}
-  keys.forEach(k=>localStorage.removeItem(k));
-  document.getElementById('modalForm').style.display='none';
-  document.getElementById('modalSuccess').style.display='flex';
+  
+  document.getElementById('modalConfirmBtn').textContent='Clearing...';
+
+  try {
+    // Delete data from Firebase
+    await fetch(FB_URL, { method: 'DELETE' });
+
+    // Local cleanup
+    const keys=[];
+    for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('fr_'))keys.push(k);}
+    keys.forEach(k=>localStorage.removeItem(k));
+
+    document.getElementById('modalForm').style.display='none';
+    document.getElementById('modalSuccess').style.display='flex';
+  } catch(e) {
+    document.getElementById('modalErr').textContent='Failed to clear cloud data. Try again.';
+    document.getElementById('modalConfirmBtn').textContent='Clear All Data';
+  }
 }
+
 document.getElementById('modalBg').addEventListener('click',function(e){if(e.target===this)closeAdmin();});
 </script>
 </body>

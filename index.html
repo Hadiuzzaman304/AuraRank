@@ -192,16 +192,15 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   <div class="logo">AuraRank</div>
   <div class="tagline">Algorithm-Driven Aura Ranking System</div>
 
-  <!-- Study Response Progress Bar -->
   <div class="study-progress">
     <div class="sp-top">
       <div class="sp-label">Study Progress</div>
-      <div class="sp-count" id="spCount">0 / 30 Responses</div>
+      <div class="sp-count" id="spCount">Loading data...</div>
     </div>
     <div class="sp-bar">
       <div class="sp-fill" id="spFill" style="width:0%"></div>
     </div>
-    <div class="sp-sub" id="spSub">Collecting participant ratings — 30 responses needed</div>
+    <div class="sp-sub" id="spSub">Syncing with cloud database...</div>
   </div>
 
   <div class="id-section">
@@ -211,7 +210,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
       <input class="id-input" id="pid" type="text" placeholder="e.g. Last 3 digit of your Student ID" onkeydown="if(event.key==='Enter')start()"/>
     </div>
     <div class="err" id="err">Please enter a participant ID to continue</div>
-    <button class="btn-primary" id="startBtn" onclick="start()">Begin Rating Session →</button>
+    <button class="btn-primary" id="startBtn" onclick="start()" disabled>Connecting...</button>
   </div>
 
   <div class="nav-cards">
@@ -236,7 +235,6 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   </div>
 </footer>
 
-<!-- ID Prompt Modal (for nav Rate button) -->
 <div class="modal-bg" id="promptModal">
   <div class="modal">
     <div class="modal-icon">🪪</div>
@@ -254,7 +252,6 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   </div>
 </div>
 
-<!-- Response Limit Reached Modal -->
 <div class="modal-bg" id="limitModal">
   <div class="modal limit-modal">
     <div class="modal-icon">🔒</div>
@@ -269,15 +266,27 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
 
 <script>
 const RESPONSE_LIMIT = 30;
+const FB_URL = 'https://aurarank-15-default-rtdb.asia-southeast1.firebasedatabase.app/responses.json';
+let totalResponses = 0;
 
-// Read total responses
-function getTotalResponses() {
-  return parseInt(localStorage.getItem('fr_total_responses') || '0', 10);
+async function fetchCloudData() {
+  try {
+    const res = await fetch(FB_URL);
+    const data = await res.json();
+    totalResponses = data ? Object.keys(data).length : 0;
+  } catch(e) {
+    console.error("Firebase sync error:", e);
+  }
+  updateProgress();
+  const startBtn = document.getElementById('startBtn');
+  if (totalResponses < RESPONSE_LIMIT) {
+     startBtn.textContent = 'Begin Rating Session →';
+     startBtn.disabled = false;
+  }
 }
 
-// Update progress bar UI
 function updateProgress() {
-  const total = Math.min(getTotalResponses(), RESPONSE_LIMIT);
+  const total = Math.min(totalResponses, RESPONSE_LIMIT);
   const pct = (total / RESPONSE_LIMIT) * 100;
   document.getElementById('spCount').textContent = `${total} / ${RESPONSE_LIMIT} Responses`;
   const fill = document.getElementById('spFill');
@@ -286,7 +295,6 @@ function updateProgress() {
     fill.classList.add('done');
     document.getElementById('spSub').textContent = '✓ All responses collected — study is complete';
     document.getElementById('spSub').style.color = 'rgba(40,167,69,0.7)';
-    // Disable the button
     const btn = document.getElementById('startBtn');
     btn.textContent = 'Study Complete — No More Submissions';
     btn.disabled = true;
@@ -296,14 +304,13 @@ function updateProgress() {
   }
 }
 
-// Pre-fill if already have a saved ID
 const saved = localStorage.getItem('fr_current_pid');
 if (saved) document.getElementById('pid').value = saved;
 
-updateProgress();
+fetchCloudData(); // Sync on load
 
 function isLimitReached() {
-  return getTotalResponses() >= RESPONSE_LIMIT;
+  return totalResponses >= RESPONSE_LIMIT;
 }
 
 function start() {

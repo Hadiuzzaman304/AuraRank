@@ -198,6 +198,8 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;margin-to
 </footer>
 
 <script>
+const FB_URL = 'https://aurarank-15-default-rtdb.asia-southeast1.firebasedatabase.app/responses.json';
+
 const celebrities = [
   { alias: "Person 01", images: ["celebrities/P01_1.png","celebrities/P01_2.png","celebrities/P01_3.png","celebrities/P01_4.png","celebrities/P01_5.png","celebrities/P01_6.png","celebrities/P01_7.png","celebrities/P01_8.png","celebrities/P01_9.png","celebrities/P01_10.png"] },
   { alias: "Person 02", images: ["celebrities/P02_1.png","celebrities/P02_2.png","celebrities/P02_3.png","celebrities/P02_4.png","celebrities/P02_5.png","celebrities/P02_6.png","celebrities/P02_7.png","celebrities/P02_8.png","celebrities/P02_9.png","celebrities/P02_10.png"] },
@@ -234,7 +236,6 @@ const storageKey = `fr_${pid}`;
 let state = null;
 try { state = JSON.parse(localStorage.getItem(storageKey)); } catch(e) {}
 
-// Reset if old 50-image session (shuffled.length > 10) or no valid state
 if (!state || !state.shuffled || state.shuffled.length !== 10) {
   state = { pid, shuffled: buildParticipantImages(), ratings: {}, currentIndex: 0, counted: false };
   save();
@@ -249,7 +250,7 @@ function save() { localStorage.setItem(storageKey, JSON.stringify(state)); }
 
 function render() {
   const idx = state.currentIndex;
-  const total = state.shuffled.length; // always 10
+  const total = state.shuffled.length; 
   if (idx >= total) { showDone(); return; }
 
   const img = state.shuffled[idx];
@@ -314,13 +315,25 @@ function advance() {
   render();
 }
 
-function showDone() {
-  // Count this participant's completion if not already counted
+async function showDone() {
   if (!state.counted) {
     state.counted = true;
     save();
-    const current = parseInt(localStorage.getItem('fr_total_responses') || '0', 10);
-    localStorage.setItem('fr_total_responses', String(current + 1));
+    
+    // Push the results to the Firebase Realtime Database
+    try {
+      await fetch(FB_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pid: state.pid,
+          ratings: state.ratings,
+          timestamp: Date.now()
+        })
+      });
+    } catch(e) {
+      console.error("Failed to push data to cloud:", e);
+    }
   }
   document.querySelector('.progress-section').style.display = 'none';
   document.querySelector('.img-section').style.display = 'none';
