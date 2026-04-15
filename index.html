@@ -97,7 +97,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 28px;
 .btn-primary:active{transform:translateY(1px);}
 .btn-primary:disabled{opacity:0.45;cursor:not-allowed;transform:none;box-shadow:none;}
 
-/* ACTION BUTTONS */
 .action-row{display:flex;gap:10px;margin-bottom:14px;width:100%;max-width:420px;flex-wrap:wrap;}
 .btn-action{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px;border-radius:14px;
   font-size:0.85rem;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;flex:1;
@@ -318,6 +317,40 @@ function isLimitReached() {
   return totalResponses >= RESPONSE_LIMIT;
 }
 
+async function checkUserAndProceed(pid) {
+  try {
+    const btn = document.getElementById('startBtn');
+    const origText = btn.textContent;
+    btn.textContent = 'Checking Cloud...';
+
+    const res = await fetch(FB_URL);
+    const data = await res.json() || {};
+
+    let alreadyCompleted = false;
+    for (const key in data) {
+       if (data[key].pid === pid && data[key].ratings && Object.keys(data[key].ratings).length >= 10) {
+           alreadyCompleted = true;
+           break;
+       }
+    }
+
+    btn.textContent = origText;
+
+    if (alreadyCompleted) {
+        alert("This Participant ID has already completed the study! Redirecting to AuraIndex...");
+        window.location.href = 'results.html';
+        return;
+    }
+
+    localStorage.setItem('fr_current_pid', pid);
+    window.location.href = 'rate.html';
+
+  } catch(e) {
+    localStorage.setItem('fr_current_pid', pid);
+    window.location.href = 'rate.html';
+  }
+}
+
 function start() {
   const pid = document.getElementById('pid').value.trim();
   if (!pid) { document.getElementById('err').style.display = 'block'; return; }
@@ -326,17 +359,14 @@ function start() {
     document.getElementById('limitModal').classList.add('show');
     return;
   }
-  localStorage.setItem('fr_current_pid', pid);
-  window.location.href = 'rate.html';
+  checkUserAndProceed(pid);
 }
 
 function goRate() {
-  const pid = localStorage.getItem('fr_current_pid');
   if (isLimitReached()) {
     document.getElementById('limitModal').classList.add('show');
     return;
   }
-  if (pid) { window.location.href = 'rate.html'; return; }
   document.getElementById('promptModal').classList.add('show');
   setTimeout(() => document.getElementById('modalPid').focus(), 120);
 }
@@ -358,18 +388,14 @@ function modalStart() {
     document.getElementById('limitModal').classList.add('show');
     return;
   }
-  localStorage.setItem('fr_current_pid', pid);
-  window.location.href = 'rate.html';
+  checkUserAndProceed(pid);
 }
 
 document.getElementById('promptModal').addEventListener('click', function(e) { if (e.target === this) closePrompt(); });
 document.getElementById('limitModal').addEventListener('click', function(e) { if (e.target === this) closeLimitModal(); });
 
-// Pre-fill saved ID
-const saved = localStorage.getItem('fr_current_pid');
-if (saved) document.getElementById('pid').value = saved;
-
-fetchCloudData(); // Sync on load
+// Load global data on page start
+fetchCloudData();
 </script>
 </body>
 </html>
