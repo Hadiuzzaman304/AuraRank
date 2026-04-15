@@ -670,9 +670,13 @@ async function exportPDF() {
     btn.disabled = false;
     btn.textContent = '⬇ Export to PDF';
   }
+  
+}
 
+// Initial Data Load
+loadData();
 
-  // Add this to the bottom of the script in results.html to auto-trigger the buttons from the index page
+// Add this to the bottom of the script in results.html to auto-trigger the buttons from the index page
 window.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   if (params.get('action') === 'show') {
@@ -683,11 +687,6 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-
-}
-
-// Initial Data Load
-loadData();
 </script>
 </body>
 </html>
