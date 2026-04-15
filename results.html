@@ -239,7 +239,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   background:linear-gradient(90deg,transparent,rgba(255,154,60,0.38));}
 .rpt-eyebrow::after{background:linear-gradient(90deg,rgba(255,154,60,0.38),transparent);}
 
-/* FIX: Solid color instead of gradient clip to prevent html2canvas background boxes */
+/* Modal Titles: Solid color for html2canvas bug avoidance */
 .rpt-title{font-family:'DM Serif Display',serif;font-size:2.6rem;font-weight:400;letter-spacing:-1px;
   color:#ff6b52; margin-bottom:5px;}
 .rpt-subtitle{font-size:0.72rem;color:rgba(255,255,255,0.28);letter-spacing:3.5px;text-transform:uppercase;margin-bottom:5px;}
@@ -249,7 +249,6 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
 .rpt-stat-box{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
   border-radius:14px;padding:16px 24px;text-align:center;min-width:100px;}
 
-/* FIX: Solid color instead of gradient clip */
 .rpt-stat-val{font-size:1.65rem;font-weight:900;letter-spacing:-0.5px; color:#ff6b52;}
 .rpt-stat-label{font-size:0.58rem;color:rgba(255,255,255,0.28);letter-spacing:2.5px;text-transform:uppercase;margin-top:3px;}
 
@@ -298,11 +297,14 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
 .rpt-foot{padding:22px 44px;border-top:1px solid rgba(255,255,255,0.06);
   display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;}
 
-/* FIX: Solid color instead of gradient clip */
 .rpt-foot-logo{font-family:'DM Serif Display',serif;font-size:1.4rem;font-weight:400; color:#ff6b52;}
 .rpt-foot-sub{font-size:0.57rem;color:rgba(255,255,255,0.18);letter-spacing:3px;text-transform:uppercase;margin-top:1px;}
 .rpt-foot-copy{font-size:0.57rem;color:rgba(255,255,255,0.1);margin-top:5px;}
 </style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
 </head>
 <body>
 <div class="bg"></div>
@@ -444,9 +446,6 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
     </div>
   </div>
 </div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
 function goRate(){
@@ -654,10 +653,8 @@ window.confirmClear = async function() {
   btn.style.opacity = '0.6';
   
   try {
-    // Clear Firebase database using REST fetch
     await fetch(FB_URL, { method: 'DELETE' });
     
-    // Clear localized remnants just in case
     const keys = [];
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
@@ -668,7 +665,6 @@ window.confirmClear = async function() {
     document.getElementById('modalForm').style.display = 'none';
     document.getElementById('modalSuccess').style.display = 'flex';
     
-    // Reload the live charts to show 0
     loadData();
     
   } catch(e) {
@@ -680,96 +676,138 @@ window.confirmClear = async function() {
 
 document.getElementById('modalBg').addEventListener('click', function(e) { if (e.target === this) window.closeAdmin(); });
 
-// ── Export to PDF (Mobile Safe & Scaled) ──
+// ── NATIVE PDF EXPORT (100% Mobile Safe, Matches UI) ──
 async function exportPDF() {
   const btn = document.getElementById('exportBtn');
   btn.disabled = true;
   btn.textContent = '⏳ Generating…';
 
-  stampMeta();
-  buildDataTable();
-
-  const modal = document.getElementById('respModal');
-  const panel = document.getElementById('rptPanel');
-  const wasShown = modal.classList.contains('show');
-
-  // Hide close button during capture
-  const closeStrip = panel.querySelector('.rpt-close-strip');
-  closeStrip.style.display = 'none';
-
-  // Make fully opaque and positioned safely so html2canvas doesn't return black on mobile
-  const origStyle = modal.style.cssText;
-  modal.style.cssText = 'display: flex !important; position: absolute !important; left: 0 !important; top: 0 !important; opacity: 0.001 !important; z-index: -100 !important; width: 100vw; align-items: flex-start; padding: 20px; pointer-events: none;';
-
-  // Wait slightly longer so mobile browsers can process the DOM geometry
-  await new Promise(r => setTimeout(r, 400));
-
   try {
-    const canvas = await html2canvas(panel, {
-      backgroundColor: '#0a0a14',
-      // Dynamically lower scale for mobile so memory doesn't crash
-      scale: window.innerWidth < 768 ? 1.2 : 2, 
-      useCORS: true, 
-      logging: false
-      // allowTaint REMOVED to prevent strict mobile security blocks on toDataURL
-    });
+    stampMeta();
+    buildDataTable();
 
     const { jsPDF } = window.jspdf;
-    const imgW = 210; // A4 width mm
-    const pageH = 297; // A4 height mm
-    const imgH = (canvas.height / canvas.width) * imgW;
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    
-    // Switch to JPEG compression (0.92) to vastly lower memory usage during generation
-    const imgData = canvas.toDataURL('image/jpeg', 0.92);
+    // Design Colors
+    const bgDark = [10, 10, 20];
+    const redAccent = [255, 77, 109];
+    const orangeAccent = [255, 154, 60];
 
-    if (imgH <= pageH) {
-      pdf.setFillColor(10, 10, 20);
-      pdf.rect(0, 0, imgW, pageH, 'F');
-      pdf.addImage(imgData, 'JPEG', 0, 0, imgW, imgH);
+    // Helper: Draw Background on every page
+    const drawBackground = () => {
+      pdf.setFillColor(...bgDark);
+      pdf.rect(0, 0, pdf.internal.pageSize.width, pdf.internal.pageSize.height, 'F');
+    };
+
+    // --- PAGE 1: Header & Stats ---
+    drawBackground();
+
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(28);
+    pdf.setTextColor(...redAccent);
+    pdf.text("AuraRank", 14, 22);
+
+    pdf.setFontSize(10);
+    pdf.setTextColor(...orangeAccent);
+    pdf.text("ALGORITHM-DRIVEN AURA RANKING SYSTEM", 14, 30);
+
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(9);
+    pdf.setTextColor(150, 150, 150);
+    const ts = document.getElementById('rptMeta').textContent;
+    pdf.text(ts, 14, 36);
+
+    pdf.setTextColor(255, 255, 255);
+    pdf.text(`Total Participants: ${participantCount}   |   Total Responses: ${totalRatings}   |   Persons Rated: 10`, 14, 46);
+
+    // --- TABLE 1: Dev Team ---
+    pdf.setFontSize(12);
+    pdf.setTextColor(...orangeAccent);
+    pdf.text("Development Team", 14, 58);
+
+    pdf.autoTable({
+      startY: 62,
+      head: [['Role', 'Name', 'Student ID', 'Section']],
+      body: [
+        ['Project Leader', 'Hadiuzzaman Ome', '232-15-304', '65-H'],
+        ['Co-Developer', 'Ahsanul Islam Faisal', '232-15-166', '65-H'],
+        ['Co-Developer', 'Habibur Rahman', '232-15-297', '65-H'],
+        ['Co-Developer', 'Shemanto Saha', '232-15-121', '65-H'],
+        ['Co-Developer', 'Md Noyon Hossain', '232-15-156', '65-H']
+      ],
+      theme: 'grid',
+      headStyles: { fillColor: [124, 92, 191], textColor: 255, fontStyle: 'bold' },
+      bodyStyles: { fillColor: [20, 20, 30], textColor: 220, lineColor: [40, 40, 50] },
+      alternateRowStyles: { fillColor: [25, 25, 38] },
+      margin: { left: 14, right: 14 },
+      willDrawPage: drawBackground // Ensures new pages get dark background before table draws
+    });
+
+    // --- TABLE 2: Ratings ---
+    const finalY = pdf.lastAutoTable.finalY || 62;
+    pdf.setFontSize(12);
+    pdf.setTextColor(...redAccent);
+    pdf.text("Rating Data Table", 14, finalY + 12);
+
+    const head = [['Participant (ID)', 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10']];
+    const body = [];
+
+    if (allRows.length === 0) {
+      body.push([{ content: 'No data yet', colSpan: 11, styles: { halign: 'center', fontStyle: 'italic' } }]);
     } else {
-      let yOffset = 0;
-      let pageNum = 0;
-      while (yOffset < canvas.height) {
-        if (pageNum > 0) pdf.addPage();
-        pdf.setFillColor(10, 10, 20);
-        pdf.rect(0, 0, imgW, pageH, 'F');
-
-        const pxPerPage = (pageH * canvas.width) / imgW;
-        const sliceH = Math.min(pxPerPage, canvas.height - yOffset);
-        
-        const sliceCanvas = document.createElement('canvas');
-        sliceCanvas.width = canvas.width;
-        sliceCanvas.height = sliceH;
-        const ctx = sliceCanvas.getContext('2d');
-        
-        ctx.fillStyle = '#0a0a14';
-        ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
-        ctx.drawImage(canvas, 0, yOffset, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
-        
-        const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.92);
-        const printH = (sliceH / canvas.width) * imgW;
-        
-        pdf.addImage(sliceData, 'JPEG', 0, 0, imgW, printH);
-        
-        yOffset += sliceH;
-        pageNum++;
-      }
+      allRows.forEach((row, i) => {
+        const r = [`Participant ${i + 1} (${row.pid})`];
+        aliases.forEach(a => { r.push(row.ratings[a] !== undefined ? row.ratings[a] : '-'); });
+        body.push(r);
+      });
     }
+
+    // Add Averages Row
+    const avgRow = ['AVERAGE'];
+    aliases.forEach(a => { avgRow.push(counts[a] > 0 ? (totals[a] / counts[a]).toFixed(2) : '-'); });
+    body.push(avgRow);
+
+    pdf.autoTable({
+      startY: finalY + 16,
+      head: head,
+      body: body,
+      theme: 'grid',
+      headStyles: { fillColor: redAccent, textColor: 255, fontStyle: 'bold' },
+      bodyStyles: { fillColor: [20, 20, 30], textColor: 220, lineColor: [40, 40, 50], halign: 'center' },
+      alternateRowStyles: { fillColor: [25, 25, 38] },
+      columnStyles: { 0: { halign: 'left', fontStyle: 'bold' } },
+      willDrawCell: function(data) {
+        // Highlight the final Average row in orange
+        if (data.row.index === body.length - 1 && allRows.length > 0) {
+          pdf.setFillColor(25, 25, 38);
+          pdf.setTextColor(...orangeAccent);
+          pdf.setFont("helvetica", "bold");
+        }
+      },
+      margin: { bottom: 20 },
+      willDrawPage: drawBackground,
+      didDrawPage: function(data) {
+        // Add footer text at the bottom of every page
+        const pageHeight = pdf.internal.pageSize.height;
+        pdf.setTextColor(100, 100, 100);
+        pdf.setFontSize(8);
+        pdf.setFont("helvetica", "normal");
+        pdf.text(
+          "© AuraRank · Hadiuzzaman Ome & Team · CSE, Daffodil International University",
+          pdf.internal.pageSize.width / 2,
+          pageHeight - 10,
+          { align: "center" }
+        );
+      }
+    });
 
     const now = new Date();
     pdf.save(`AuraRank_Study_${now.toISOString().slice(0, 10)}.pdf`);
   } catch (err) {
     console.error('PDF export failed:', err);
-    alert('Export failed on this device. Try a desktop or close other apps to free memory.');
+    alert('Export failed. Please check your connection and try again.');
   } finally {
-    // Restore Original UI Flow
-    modal.style.cssText = origStyle;
-    closeStrip.style.display = '';
-    if (!wasShown) {
-      modal.classList.remove('show');
-    }
     btn.disabled = false;
     btn.textContent = '⬇ Export to PDF';
   }
