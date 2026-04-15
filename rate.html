@@ -80,8 +80,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 28px;
 .star-numbers{display:flex;gap:2px;justify-content:center;font-size:0.65rem;color:rgba(255,255,255,0.35);margin-top:-10px;}
 .star-numbers span{width:clamp(1.5rem,4.5vw,1.9rem);text-align:center;}
 
-.score-label{font-size:0.85rem;color:rgba(255,255,255,0.45);min-height:20px;margin-top:16px;margin-bottom:18px;transition:all 0.2s;}
+.score-label{font-size:0.85rem;color:rgba(255,255,255,0.45);min-height:20px;margin-top:16px;margin-bottom:6px;transition:all 0.2s;}
 .score-label span{color:var(--orange);font-weight:700;font-size:0.95rem;}
+
+.instruction-text {font-size: 0.72rem;color: rgba(255,255,255,0.35);letter-spacing: 0.5px;margin-bottom: 16px;font-style: italic;text-align: center;}
 
 .auto-indicator{display:flex;align-items:center;gap:8px;font-size:0.7rem;color:rgba(255,255,255,0.28);margin-bottom:10px;}
 .auto-dots{display:flex;gap:5px;}
@@ -137,7 +139,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;margin-to
 <div class="wrap" id="mainWrap">
   <div class="progress-section">
     <div class="progress-top">
-      <div class="counter" id="counter">Image 1 of 10</div>
+      <div class="counter" id="counter">Loading...</div>
       <div class="pid-badge" id="pidBadge">—</div>
     </div>
     <div class="progress-bar"><div class="progress-fill" id="bar" style="width:0%"></div></div>
@@ -171,6 +173,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;margin-to
       <span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
     </div>
     <div class="score-label" id="scoreLabel">Select a rating</div>
+    <div class="instruction-text">Rate based on your immediate impression of their aura.</div>
     <div class="auto-indicator" id="autoInd" style="display:none">
       <span>Next in</span>
       <div class="auto-dots" id="dots">
@@ -198,7 +201,14 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;margin-to
 </footer>
 
 <script>
-const FB_URL = 'https://aurarank-15-default-rtdb.asia-southeast1.firebasedatabase.app/responses.json';
+const pid = localStorage.getItem('fr_current_pid');
+if (!pid) window.location.href = 'index.html';
+
+document.getElementById('pidBadge').textContent = pid;
+
+// ── Firebase Session Setup ──
+// Use PUT specifically on this URL to map this state strictly to this PID
+const FB_SESSION_URL = `https://aurarank-15-default-rtdb.asia-southeast1.firebasedatabase.app/responses/${pid}.json`;
 
 const celebrities = [
   { alias: "Person 01", images: ["celebrities/P01_1.png","celebrities/P01_2.png","celebrities/P01_3.png","celebrities/P01_4.png","celebrities/P01_5.png","celebrities/P01_6.png","celebrities/P01_7.png","celebrities/P01_8.png","celebrities/P01_9.png","celebrities/P01_10.png"] },
@@ -213,7 +223,6 @@ const celebrities = [
   { alias: "Person 10", images: ["celebrities/P10_1.png","celebrities/P10_2.png","celebrities/P10_3.png","celebrities/P10_4.png","celebrities/P10_5.png","celebrities/P10_6.png","celebrities/P10_7.png","celebrities/P10_8.png","celebrities/P10_9.png","celebrities/P10_10.png"] }
 ];
 
-// Pick 1 random image per person → 10 images total, then shuffle
 function buildParticipantImages() {
   const picked = celebrities.map(c => {
     const src = c.images[Math.floor(Math.random() * c.images.length)];
@@ -227,26 +236,46 @@ function buildParticipantImages() {
   return picked;
 }
 
-const pid = localStorage.getItem('fr_current_pid');
-if (!pid) window.location.href = 'index.html';
-
-document.getElementById('pidBadge').textContent = pid;
-
-const storageKey = `fr_${pid}`;
 let state = null;
-try { state = JSON.parse(localStorage.getItem(storageKey)); } catch(e) {}
-
-if (!state || !state.shuffled || state.shuffled.length !== 10) {
-  state = { pid, shuffled: buildParticipantImages(), ratings: {}, currentIndex: 0, counted: false };
-  save();
-}
-
 const labels = ['','Terrible','Poor','Below Average','Fair','Average','Above Average','Good','Very Good','Excellent','Perfect'];
 let selectedRating = 0;
 let autoTimer = null;
 let dotStep = 0;
 
-function save() { localStorage.setItem(storageKey, JSON.stringify(state)); }
+async function initSession() {
+  try {
+    const res = await fetch(FB_SESSION_URL);
+    if (res.ok) state = await res.json();
+  } catch(e) {
+    console.log("Creating new session logic via fallback.");
+  }
+
+  // If no state exists or invalid, create a fresh one and push it to cloud immediately
+  if (!state || !state.shuffled || state.shuffled.length !== 10) {
+    state = { 
+      pid: pid, 
+      shuffled: buildParticipantImages(), 
+      ratings: {}, 
+      currentIndex: 0, 
+      counted: false,
+      timestamp: Date.now()
+    };
+    await saveToCloud();
+  }
+  render();
+}
+
+async function saveToCloud() {
+  try {
+    await fetch(FB_SESSION_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(state)
+    });
+  } catch(e) {
+    console.error("Cloud save failed:", e);
+  }
+}
 
 function render() {
   const idx = state.currentIndex;
@@ -311,29 +340,16 @@ function advance() {
   const img = state.shuffled[state.currentIndex];
   state.ratings[img.id] = selectedRating;
   state.currentIndex++;
-  save();
+  
+  // Render instantly for UI snapiness, save in the background
   render();
+  saveToCloud();
 }
 
 async function showDone() {
   if (!state.counted) {
     state.counted = true;
-    save();
-    
-    // Push the results to the Firebase Realtime Database
-    try {
-      await fetch(FB_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          pid: state.pid,
-          ratings: state.ratings,
-          timestamp: Date.now()
-        })
-      });
-    } catch(e) {
-      console.error("Failed to push data to cloud:", e);
-    }
+    await saveToCloud();
   }
   document.querySelector('.progress-section').style.display = 'none';
   document.querySelector('.img-section').style.display = 'none';
@@ -342,7 +358,8 @@ async function showDone() {
   d.style.display = 'flex';
 }
 
-render();
+// Start Session check on load
+initSession();
 </script>
 </body>
 </html>
