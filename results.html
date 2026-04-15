@@ -162,6 +162,14 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 28px;
 .sp-fill.done{background:linear-gradient(90deg,#28a745,#20c654);}
 .sp-sub{font-size:0.64rem;color:rgba(255,255,255,0.22);margin-top:8px;}
 
+/* EXPORT PDF BUTTON */
+.export-btn{position:fixed;bottom:24px;right:24px;z-index:200;padding:11px 18px;
+  background:rgba(124,92,191,0.1);border:1px solid rgba(124,92,191,0.25);border-radius:22px;
+  color:rgba(168,140,220,0.8);font-size:0.75rem;font-weight:600;font-family:'Outfit',sans-serif;
+  cursor:pointer;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transition:all 0.22s;}
+.export-btn:hover{background:rgba(124,92,191,0.22);border-color:rgba(124,92,191,0.5);color:var(--purple);transform:translateY(-1px);}
+.export-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+
 footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   background:rgba(7,7,15,0.65);backdrop-filter:blur(28px) saturate(1.5);-webkit-backdrop-filter:blur(28px) saturate(1.5);
   border-top:1px solid rgba(255,255,255,0.08);}
@@ -230,6 +238,10 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   </div>
 </footer>
 
+<button class="export-btn" id="exportPdfBtn" onclick="exportToPDF()">📄 Export to PDF</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script>
 function goRate(){
   const pid=localStorage.getItem('fr_current_pid');
@@ -355,6 +367,123 @@ if(participantCount===0){
       el.style.width=el.dataset.w+'%';
     });
   },120);
+}
+
+function exportToPDF(){
+  const btn=document.getElementById('exportPdfBtn');
+  btn.disabled=true;
+  btn.textContent='Generating...';
+
+  try{
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+
+    // Title
+    doc.setFontSize(16);
+    doc.setTextColor(255,77,109);
+    doc.text('AuraRank — Rating Data Export',14,15);
+
+    doc.setFontSize(9);
+    doc.setTextColor(120,120,120);
+    doc.text('Participant ratings for Person 01 through Person 10',14,21);
+    doc.text('Generated: '+new Date().toLocaleString(),14,26);
+
+    // Collect all participant data
+    const participantData=[];
+    for(let i=0;i<localStorage.length;i++){
+      const key=localStorage.key(i);
+      if(!key||!key.startsWith('fr_')||key==='fr_current_pid'||key==='fr_total_responses') continue;
+      try{
+        const data=JSON.parse(localStorage.getItem(key));
+        if(!data||!data.ratings) continue;
+        const entries=Object.entries(data.ratings);
+        if(entries.length===0) continue;
+        const pid=data.pid||key.replace('fr_','');
+        const row={pid};
+        aliases.forEach(alias=>{
+          const match=entries.find(([id])=>id.startsWith(alias));
+          row[alias]=match?match[1]:'';
+        });
+        participantData.push(row);
+      }catch(e){continue;}
+    }
+
+    // Sort by participant ID
+    participantData.sort((a,b)=>a.pid.localeCompare(b.pid));
+
+    // Build table headers
+    const headers=['Participant','Person 01','Person 02','Person 03','Person 04','Person 05','Person 06','Person 07','Person 08','Person 09','Person 10'];
+
+    // Build table rows
+    const rows=participantData.map((p,idx)=>{
+      return [`Participant ${idx+1} (ID: ${p.pid})`,
+        p['Person 01']!==undefined?p['Person 01']:'',
+        p['Person 02']!==undefined?p['Person 02']:'',
+        p['Person 03']!==undefined?p['Person 03']:'',
+        p['Person 04']!==undefined?p['Person 04']:'',
+        p['Person 05']!==undefined?p['Person 05']:'',
+        p['Person 06']!==undefined?p['Person 06']:'',
+        p['Person 07']!==undefined?p['Person 07']:'',
+        p['Person 08']!==undefined?p['Person 08']:'',
+        p['Person 09']!==undefined?p['Person 09']:'',
+        p['Person 10']!==undefined?p['Person 10']:''
+      ];
+    });
+
+    // Pad to 30 rows if fewer
+    while(rows.length<30){
+      const idx=rows.length;
+      rows.push([`Participant ${idx+1} (ID: —)`,'','','','','','','','','','']);
+    }
+
+    doc.autoTable({
+      head:[headers],
+      body:rows,
+      startY:32,
+      theme:'grid',
+      headStyles:{
+        fillColor:[255,77,109],
+        textColor:[255,255,255],
+        fontStyle:'bold',
+        halign:'center',
+        fontSize:8
+      },
+      bodyStyles:{
+        textColor:[50,50,50],
+        fontSize:7.5,
+        halign:'center'
+      },
+      columnStyles:{
+        0:{halign:'left',fontStyle:'bold',cellWidth:50}
+      },
+      alternateRowStyles:{
+        fillColor:[245,240,250]
+      },
+      margin:{left:14,right:14},
+      styles:{
+        cellPadding:2,
+        lineColor:[200,200,200],
+        lineWidth:0.2
+      }
+    });
+
+    // Footer
+    const pageCount=doc.internal.getNumberOfPages();
+    for(let p=1;p<=pageCount;p++){
+      doc.setPage(p);
+      doc.setFontSize(7);
+      doc.setTextColor(160,160,160);
+      doc.text(`AuraRank — CSE316 · Artificial Intelligence · Daffodil International University | Page ${p} of ${pageCount}`,14,doc.internal.pageSize.height()-8);
+    }
+
+    doc.save('AuraRank_Rating_Data.pdf');
+  }catch(e){
+    console.error('PDF export error:',e);
+    alert('Failed to generate PDF. Check console for details.');
+  }
+
+  btn.disabled=false;
+  btn.textContent='📄 Export to PDF';
 }
 </script>
 </body>
