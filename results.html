@@ -141,41 +141,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:13px 28px;
 .sp-fill.done{background:linear-gradient(90deg,#28a745,#20c654);}
 .sp-sub{font-size:0.64rem;color:rgba(255,255,255,0.22);margin-top:8px;}
 
-/* ADMIN BUTTON */
-.admin-btn{position:fixed;bottom:24px;right:24px;z-index:200;padding:11px 18px;
-  background:rgba(255,50,50,0.1);border:1px solid rgba(255,80,80,0.25);border-radius:22px;
-  color:rgba(255,120,120,0.8);font-size:0.75rem;font-weight:600;font-family:'Outfit',sans-serif;
-  cursor:pointer;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transition:all 0.22s;}
-.admin-btn:hover{background:rgba(255,50,50,0.22);border-color:rgba(255,80,80,0.5);color:var(--red);transform:translateY(-1px);}
-
-/* MODAL CSS */
-.modal-bg{position:fixed;inset:0;z-index:900;background:rgba(7,7,15,0.82);
-  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-  display:none;align-items:center;justify-content:center;padding:20px;}
-.modal-bg.show{display:flex;}
-.modal{background:rgba(16,16,28,0.97);border:1px solid rgba(255,255,255,0.11);
-  border-radius:28px;padding:36px 32px;width:100%;max-width:360px;text-align:center;
-  box-shadow:0 32px 72px rgba(0,0,0,0.6);animation:popIn 0.3s cubic-bezier(0.34,1.56,0.64,1);}
-@keyframes popIn{from{opacity:0;transform:scale(0.88) translateY(20px);}to{opacity:1;transform:none;}}
-.modal h3{font-size:1.15rem;font-weight:700;margin-bottom:6px;}
-.modal p{font-size:0.82rem;color:rgba(255,255,255,0.4);margin-bottom:22px;line-height:1.65;}
-.modal input{width:100%;padding:13px 16px;background:rgba(255,255,255,0.06);
-  border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:#fff;
-  font-size:1rem;font-family:'Outfit',sans-serif;outline:none;margin-bottom:8px;
-  transition:all 0.2s;text-align:center;letter-spacing:4px;}
-.modal input:focus{border-color:rgba(255,77,109,0.5);background:rgba(255,77,109,0.06);}
-.modal-err{color:var(--red);font-size:0.76rem;margin-bottom:14px;min-height:18px;}
-.modal-btns{display:flex;gap:10px;}
-.modal-cancel{flex:1;padding:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
-  border-radius:12px;color:rgba(255,255,255,0.55);font-size:0.88rem;font-family:'Outfit',sans-serif;cursor:pointer;transition:all 0.2s;}
-.modal-cancel:hover{background:rgba(255,255,255,0.1);color:#fff;transform:translateY(-1px);}
-.modal-confirm{flex:1;padding:12px;background:rgba(255,50,50,0.18);border:1px solid rgba(255,80,80,0.3);
-  border-radius:12px;color:var(--red);font-size:0.88rem;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;transition:all 0.22s;}
-.modal-confirm:hover{background:rgba(255,50,50,0.28);transform:translateY(-1px);}
-.modal-success{display:none;flex-direction:column;align-items:center;gap:12px;}
-.success-icon{font-size:3rem;}
-.modal-success p{color:rgba(255,255,255,0.44);font-size:0.85rem;}
-
 footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   background:rgba(7,7,15,0.65);backdrop-filter:blur(28px) saturate(1.5);-webkit-backdrop-filter:blur(28px) saturate(1.5);
   border-top:1px solid rgba(255,255,255,0.08);}
@@ -207,6 +172,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
 }
 .resp-modal-bg.show{display:flex;}
 
+/* The actual report panel */
 #rptPanel{
   width:100%;max-width:1100px;margin:auto;
   background:#0a0a14;
@@ -218,6 +184,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
     radial-gradient(ellipse 55% 40% at 92% 94%,rgba(124,92,191,0.10) 0%,transparent 55%);
 }
 
+/* Close strip */
 .rpt-close-strip{
   display:flex;justify-content:flex-end;
   padding:14px 20px 0;background:transparent;
@@ -231,6 +198,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
 }
 .rpt-close-btn:hover{background:rgba(255,77,109,0.16);border-color:rgba(255,77,109,0.35);color:#fff;}
 
+/* Report header */
 .rpt-header{padding:36px 44px 26px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.06);}
 .rpt-eyebrow{font-size:0.6rem;letter-spacing:4px;text-transform:uppercase;
   color:rgba(255,154,60,0.65);margin-bottom:12px;
@@ -245,6 +213,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
 .rpt-subtitle{font-size:0.72rem;color:rgba(255,255,255,0.28);letter-spacing:3.5px;text-transform:uppercase;margin-bottom:5px;}
 .rpt-meta{font-size:0.65rem;color:rgba(255,255,255,0.16);letter-spacing:0.5px;}
 
+/* Stats strip */
 .rpt-stats-row{display:flex;justify-content:center;gap:14px;padding:22px 44px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,0.06);}
 .rpt-stat-box{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
   border-radius:14px;padding:16px 24px;text-align:center;min-width:100px;}
@@ -253,6 +222,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
 .rpt-stat-val{font-size:1.65rem;font-weight:900;letter-spacing:-0.5px; color:#ff6b52;}
 .rpt-stat-label{font-size:0.58rem;color:rgba(255,255,255,0.28);letter-spacing:2.5px;text-transform:uppercase;margin-top:3px;}
 
+/* Section headings inside modal */
 .rpt-section-label{
   padding:22px 44px 10px;
   font-size:0.62rem;letter-spacing:3.5px;text-transform:uppercase;
@@ -261,6 +231,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
 }
 .rpt-section-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.07);}
 
+/* Tables */
 .rpt-tbl-wrap{padding:0 44px 24px;overflow-x:auto;}
 .rpt-tbl{width:100%;border-collapse:collapse;font-size:0.82rem;}
 .rpt-tbl thead tr{background:rgba(255,77,109,0.10);border-bottom:1px solid rgba(255,77,109,0.18);}
@@ -276,6 +247,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
   border:1px solid rgba(124,92,191,0.26);border-radius:20px;
   font-size:0.62rem;font-weight:700;letter-spacing:1px;color:rgba(168,140,220,0.88);}
 
+/* Data table (wider) */
 .rpt-data-tbl{width:100%;border-collapse:collapse;font-size:0.76rem;}
 .rpt-data-tbl thead tr{background:rgba(255,77,109,0.10);}
 .rpt-data-tbl th{padding:10px 9px;text-align:center;font-size:0.58rem;font-weight:700;
@@ -295,6 +267,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
 .rpt-data-tbl tfoot .avg-row td:first-child{color:var(--orange);}
 .rpt-no-data{text-align:center;padding:28px;color:rgba(255,255,255,0.18);font-style:italic;}
 
+/* Modal footer */
 .rpt-foot{padding:22px 44px;border-top:1px solid rgba(255,255,255,0.06);
   display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;}
 
@@ -355,29 +328,6 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
     <div class="footer-copy">© AuraRank</div>
   </div>
 </footer>
-
-<button class="admin-btn" onclick="openAdmin()">⚙ Clear Data — Admin</button>
-
-<div class="modal-bg" id="modalBg">
-  <div class="modal">
-    <div id="modalForm">
-      <h3>Admin Access</h3>
-      <p>Enter the admin password to clear all rating data.</p>
-      <input type="password" id="adminPass" placeholder="••••••" onkeydown="if(event.key==='Enter')confirmClear()"/>
-      <div class="modal-err" id="modalErr"></div>
-      <div class="modal-btns">
-        <button class="modal-cancel" onclick="closeAdmin()">Cancel</button>
-        <button class="modal-confirm" onclick="confirmClear()">Clear All Data</button>
-      </div>
-    </div>
-    <div class="modal-success" id="modalSuccess">
-      <div class="success-icon">✅</div>
-      <h3>Data Cleared</h3>
-      <p>All rating data has been removed successfully.</p>
-      <button class="modal-cancel" onclick="closeAdmin()" style="margin-top:8px">Close</button>
-    </div>
-  </div>
-</div>
 
 <div class="resp-modal-bg" id="respModal">
   <div id="rptPanel">
@@ -626,61 +576,7 @@ function closeResponses() {
 
 document.getElementById('respModal').addEventListener('click', function(e) { if (e.target === this) closeResponses(); });
 
-// ── ADMIN CONTROLS (REST API via fetch) ──
-window.openAdmin = function() {
-  document.getElementById('modalBg').classList.add('show');
-  document.getElementById('adminPass').value = '';
-  document.getElementById('modalErr').textContent = '';
-  document.getElementById('modalForm').style.display = 'block';
-  document.getElementById('modalSuccess').style.display = 'none';
-  setTimeout(() => document.getElementById('adminPass').focus(), 100);
-};
-
-window.closeAdmin = function() {
-  document.getElementById('modalBg').classList.remove('show');
-};
-
-window.confirmClear = async function() {
-  const pass = document.getElementById('adminPass').value;
-  if (pass !== 'leo15') {
-    document.getElementById('modalErr').textContent = 'Incorrect password. Try again.';
-    document.getElementById('adminPass').value = '';
-    document.getElementById('adminPass').focus();
-    return;
-  }
-  
-  const btn = document.querySelector('.modal-confirm');
-  btn.textContent = 'Clearing...';
-  btn.style.opacity = '0.6';
-  
-  try {
-    // Clear Firebase database using REST fetch
-    await fetch(FB_URL, { method: 'DELETE' });
-    
-    // Clear localized remnants just in case
-    const keys = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (k && k.startsWith('fr_')) keys.push(k);
-    }
-    keys.forEach(k => localStorage.removeItem(k));
-    
-    document.getElementById('modalForm').style.display = 'none';
-    document.getElementById('modalSuccess').style.display = 'flex';
-    
-    // Reload the live charts to show 0
-    loadData();
-    
-  } catch(e) {
-    document.getElementById('modalErr').textContent = 'Error clearing cloud data: ' + e.message;
-    btn.textContent = 'Clear All Data';
-    btn.style.opacity = '1';
-  }
-};
-
-document.getElementById('modalBg').addEventListener('click', function(e) { if (e.target === this) window.closeAdmin(); });
-
-// ── Export to PDF (Mobile Safe & Scaled) ──
+// ── Export to PDF (Fixed Canvas Logic) ──
 async function exportPDF() {
   const btn = document.getElementById('exportBtn');
   btn.disabled = true;
@@ -697,21 +593,21 @@ async function exportPDF() {
   const closeStrip = panel.querySelector('.rpt-close-strip');
   closeStrip.style.display = 'none';
 
-  // Make fully opaque and positioned safely so html2canvas doesn't return black on mobile
+  // Move offscreen but keep fully visible for html2canvas
+  // This absolutely guarantees html2canvas can read it without returning a black/blank canvas
   const origStyle = modal.style.cssText;
-  modal.style.cssText = 'display: flex !important; position: absolute !important; left: 0 !important; top: 0 !important; opacity: 0.001 !important; z-index: -100 !important; width: 100vw; align-items: flex-start; padding: 20px; pointer-events: none;';
+  modal.style.cssText = 'display: flex !important; position: absolute !important; left: -9999px !important; top: 0 !important; visibility: visible !important; opacity: 1 !important; z-index: -1 !important; width: 100vw; align-items: flex-start; padding: 20px;';
 
-  // Wait slightly longer so mobile browsers can process the DOM geometry
-  await new Promise(r => setTimeout(r, 400));
+  // Brief timeout to ensure the browser paints the changes
+  await new Promise(r => setTimeout(r, 300));
 
   try {
     const canvas = await html2canvas(panel, {
       backgroundColor: '#0a0a14',
-      // Dynamically lower scale for mobile so memory doesn't crash
-      scale: window.innerWidth < 768 ? 1.2 : 2, 
-      useCORS: true, 
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
       logging: false
-      // allowTaint REMOVED to prevent strict mobile security blocks on toDataURL
     });
 
     const { jsPDF } = window.jspdf;
@@ -721,8 +617,8 @@ async function exportPDF() {
 
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     
-    // Switch to JPEG compression (0.92) to vastly lower memory usage during generation
-    const imgData = canvas.toDataURL('image/jpeg', 0.92);
+    // Switch to JPEG to avoid any transparent layer rendering issues
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
     if (imgH <= pageH) {
       pdf.setFillColor(10, 10, 20);
@@ -736,6 +632,7 @@ async function exportPDF() {
         pdf.setFillColor(10, 10, 20);
         pdf.rect(0, 0, imgW, pageH, 'F');
 
+        // Calculate pixel height for one A4 page
         const pxPerPage = (pageH * canvas.width) / imgW;
         const sliceH = Math.min(pxPerPage, canvas.height - yOffset);
         
@@ -748,7 +645,7 @@ async function exportPDF() {
         ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
         ctx.drawImage(canvas, 0, yOffset, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
         
-        const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.92);
+        const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.95);
         const printH = (sliceH / canvas.width) * imgW;
         
         pdf.addImage(sliceData, 'JPEG', 0, 0, imgW, printH);
@@ -762,7 +659,7 @@ async function exportPDF() {
     pdf.save(`AuraRank_Study_${now.toISOString().slice(0, 10)}.pdf`);
   } catch (err) {
     console.error('PDF export failed:', err);
-    alert('Export failed on this device. Try a desktop or close other apps to free memory.');
+    alert('Export failed. Please try again.');
   } finally {
     // Restore Original UI Flow
     modal.style.cssText = origStyle;
@@ -778,17 +675,18 @@ async function exportPDF() {
 // Initial Data Load
 loadData();
 
-// Listen to URL params to auto-open if linked from index page
+// Add this to the bottom of the script in results.html to auto-trigger the buttons from the index page
 window.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   if (params.get('action') === 'show') {
-    setTimeout(showResponses, 400);
+    setTimeout(showResponses, 400); // Small delay to let data load
   }
   if (params.get('action') === 'export') {
-    setTimeout(exportPDF, 400);
+    setTimeout(exportPDF, 400); // Small delay to let data load
   }
 });
 
 </script>
 </body>
 </html>
+}
