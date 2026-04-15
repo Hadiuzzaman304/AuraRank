@@ -206,10 +206,10 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
 .rpt-eyebrow::before,.rpt-eyebrow::after{content:'';width:30px;height:1px;
   background:linear-gradient(90deg,transparent,rgba(255,154,60,0.38));}
 .rpt-eyebrow::after{background:linear-gradient(90deg,rgba(255,154,60,0.38),transparent);}
+
+/* FIX: Solid color instead of gradient clip to prevent html2canvas background boxes */
 .rpt-title{font-family:'DM Serif Display',serif;font-size:2.6rem;font-weight:400;letter-spacing:-1px;
-  background:linear-gradient(140deg,#fff 0%,var(--red) 38%,var(--orange) 68%,#fff 100%);
-  background-size:300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  margin-bottom:5px;}
+  color:#ff6b52; margin-bottom:5px;}
 .rpt-subtitle{font-size:0.72rem;color:rgba(255,255,255,0.28);letter-spacing:3.5px;text-transform:uppercase;margin-bottom:5px;}
 .rpt-meta{font-size:0.65rem;color:rgba(255,255,255,0.16);letter-spacing:0.5px;}
 
@@ -217,9 +217,9 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
 .rpt-stats-row{display:flex;justify-content:center;gap:14px;padding:22px 44px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,0.06);}
 .rpt-stat-box{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
   border-radius:14px;padding:16px 24px;text-align:center;min-width:100px;}
-.rpt-stat-val{font-size:1.65rem;font-weight:900;letter-spacing:-0.5px;
-  background:linear-gradient(130deg,var(--red),var(--orange));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+/* FIX: Solid color instead of gradient clip */
+.rpt-stat-val{font-size:1.65rem;font-weight:900;letter-spacing:-0.5px; color:#ff6b52;}
 .rpt-stat-label{font-size:0.58rem;color:rgba(255,255,255,0.28);letter-spacing:2.5px;text-transform:uppercase;margin-top:3px;}
 
 /* Section headings inside modal */
@@ -270,9 +270,9 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
 /* Modal footer */
 .rpt-foot{padding:22px 44px;border-top:1px solid rgba(255,255,255,0.06);
   display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;}
-.rpt-foot-logo{font-family:'DM Serif Display',serif;font-size:1.4rem;font-weight:400;
-  background:linear-gradient(130deg,var(--red),var(--orange));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+/* FIX: Solid color instead of gradient clip */
+.rpt-foot-logo{font-family:'DM Serif Display',serif;font-size:1.4rem;font-weight:400; color:#ff6b52;}
 .rpt-foot-sub{font-size:0.57rem;color:rgba(255,255,255,0.18);letter-spacing:3px;text-transform:uppercase;margin-top:1px;}
 .rpt-foot-copy{font-size:0.57rem;color:rgba(255,255,255,0.1);margin-top:5px;}
 </style>
@@ -355,10 +355,10 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
         <thead><tr><th>Role</th><th>Name</th><th>Student ID</th><th>Section</th></tr></thead>
         <tbody>
           <tr><td><span class="badge-leader">Project Leader</span></td><td>Hadiuzzaman Ome</td><td>232-15-304</td><td>65-H</td></tr>
-          <tr><td><span class="badge-codev">Co-Developer</span></td><td>Ahsanul Islam Faisal</td><td>232-15-166</td><td>—</td></tr>
-          <tr><td><span class="badge-codev">Co-Developer</span></td><td>Habibur Rahman</td><td>232-15-297</td><td>—</td></tr>
-          <tr><td><span class="badge-codev">Co-Developer</span></td><td>Shemanto Saha</td><td>232-15-121</td><td>—</td></tr>
-          <tr><td><span class="badge-codev">Co-Developer</span></td><td>Md Noyon Hossain</td><td>232-15-156</td><td>—</td></tr>
+          <tr><td><span class="badge-codev">Co-Developer</span></td><td>Ahsanul Islam Faisal</td><td>232-15-166</td><td>65-H</td></tr>
+          <tr><td><span class="badge-codev">Co-Developer</span></td><td>Habibur Rahman</td><td>232-15-297</td><td>65-H</td></tr>
+          <tr><td><span class="badge-codev">Co-Developer</span></td><td>Shemanto Saha</td><td>232-15-121</td><td>65-H</td></tr>
+          <tr><td><span class="badge-codev">Co-Developer</span></td><td>Md Noyon Hossain</td><td>232-15-156</td><td>65-H</td></tr>
         </tbody>
       </table>
     </div>
