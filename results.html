@@ -670,6 +670,20 @@ async function exportPDF() {
     btn.disabled = false;
     btn.textContent = '⬇ Export to PDF';
   }
+
+
+  // Add this to the bottom of the script in results.html to auto-trigger the buttons from the index page
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('action') === 'show') {
+    setTimeout(showResponses, 400); // Small delay to let data load
+  }
+  if (params.get('action') === 'export') {
+    setTimeout(exportPDF, 400); // Small delay to let data load
+  }
+});
+
+
 }
 
 // Initial Data Load
