@@ -328,7 +328,7 @@ async function checkUserAndProceed(pid) {
 
     let alreadyCompleted = false;
     for (const key in data) {
-       if (data[key].pid === pid && data[key].ratings && Object.keys(data[key].ratings).length >= 10) {
+       if (data[key].pid === pid && data[key].ratings && Object.keys(data[key].ratings).length >= 250) {
            alreadyCompleted = true;
            break;
        }
