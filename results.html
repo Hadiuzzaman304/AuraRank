@@ -345,7 +345,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
     <div class="rpt-stats-row">
       <div class="rpt-stat-box"><div class="rpt-stat-val" id="rptP">0</div><div class="rpt-stat-label">Participants</div></div>
       <div class="rpt-stat-box"><div class="rpt-stat-val" id="rptR">0</div><div class="rpt-stat-label">Responses</div></div>
-      <div class="rpt-stat-box"><div class="rpt-stat-val">10</div><div class="rpt-stat-label">Persons Rated</div></div>
+      <div class="rpt-stat-box"><div class="rpt-stat-val" id="rptImgCount">250</div><div class="rpt-stat-label">Images Rated</div></div>
       <div class="rpt-stat-box"><div class="rpt-stat-val">1–10</div><div class="rpt-stat-label">Score Range</div></div>
     </div>
 
@@ -365,26 +365,7 @@ footer{position:relative;z-index:1;padding:16px 28px;text-align:center;
 
     <div class="rpt-section-label">Rating Data Table</div>
     <div class="rpt-tbl-wrap">
-      <table class="rpt-data-tbl" id="rptDataTable">
-        <thead>
-          <tr>
-            <th>Participant (ID)</th>
-            <th>P01</th><th>P02</th><th>P03</th><th>P04</th><th>P05</th>
-            <th>P06</th><th>P07</th><th>P08</th><th>P09</th><th>P10</th>
-          </tr>
-        </thead>
-        <tbody id="rptDataBody">
-          <tr><td colspan="11" class="rpt-no-data">No data yet</td></tr>
-        </tbody>
-        <tfoot>
-          <tr class="avg-row">
-            <td>Average</td>
-            <td id="avg01">—</td><td id="avg02">—</td><td id="avg03">—</td>
-            <td id="avg04">—</td><td id="avg05">—</td><td id="avg06">—</td>
-            <td id="avg07">—</td><td id="avg08">—</td><td id="avg09">—</td><td id="avg10">—</td>
-          </tr>
-        </tfoot>
-      </table>
+      <div id="rptDataTableWrap"><div class="rpt-no-data">Loading data...</div></div>
     </div>
 
     <div class="rpt-foot">
@@ -405,18 +386,31 @@ function goRate(){
   else{window.location.href='index.html';}
 }
 
-// ── Globals & Firebase Configuration ──
+// ── Config ──
 const FB_URL = 'https://aurarank-15-default-rtdb.asia-southeast1.firebasedatabase.app/responses.json';
 const RESPONSE_LIMIT = 30;
-let globalRawData = null;
+
+// Generate ordered list of all 250 image IDs: P01_1 … P50_5
+const ALL_IMAGES = [];
+for (let p = 1; p <= 50; p++) {
+  const id = String(p).padStart(2,'0');
+  for (let img = 1; img <= 5; img++) ALL_IMAGES.push(`P${id}_${img}`);
+}
+
+// Per-person averages: group 5 images per person
+const PERSONS = Array.from({length:50},(_,i)=>String(i+1).padStart(2,'0')); // ['01'..'50']
+
+let globalRawData = {};
 let participantCount = 0;
 let totalRatings = 0;
-let allRows = [];
-const aliases = ["Person 01","Person 02","Person 03","Person 04","Person 05","Person 06","Person 07","Person 08","Person 09","Person 10"];
-let totals = {};
-let counts = {};
 
-// ── Fetch & Parse Data from Firebase ──
+// imageRatings[imgId] = { total, count }
+let imageRatings = {};
+// participantRatings[pid][imgId] = score  (ordered by pid key)
+let participantRatings = {};
+let orderedPids = []; // PIDs in the order they appear in Firebase
+
+// ── Fetch & Parse ──
 async function loadData() {
   try {
     const res = await fetch(FB_URL);
@@ -430,75 +424,84 @@ async function loadData() {
 }
 
 function processData() {
-  totals = {}; counts = {};
-  aliases.forEach(a => { totals[a] = 0; counts[a] = 0; });
-  allRows = [];
+  imageRatings = {};
+  participantRatings = {};
+  orderedPids = [];
   participantCount = 0;
   totalRatings = 0;
+  ALL_IMAGES.forEach(id => { imageRatings[id] = {total:0, count:0}; });
 
-  const entries = Object.values(globalRawData);
-  updateProgress(entries.length);
-
-  entries.forEach(entry => {
-    if (!entry.ratings) return;
+  Object.entries(globalRawData).forEach(([key, entry]) => {
+    if (!entry || !entry.ratings) return;
+    const pid = entry.pid || key;
+    orderedPids.push(pid);
+    participantRatings[pid] = {};
     participantCount++;
-    const rowRatings = {};
-    for (const [id, score] of Object.entries(entry.ratings)) {
-      const alias = aliases.find(a => id.startsWith(a));
-      if (alias) {
-        totals[alias] += score;
-        counts[alias]++;
+    for (const [imgId, score] of Object.entries(entry.ratings)) {
+      if (imageRatings[imgId] !== undefined) {
+        imageRatings[imgId].total += score;
+        imageRatings[imgId].count++;
         totalRatings++;
-        rowRatings[alias] = score;
       }
+      participantRatings[pid][imgId] = score;
     }
-    allRows.push({ pid: entry.pid || 'Unknown', ratings: rowRatings });
   });
+
+  updateProgress(participantCount);
 }
 
-function updateProgress(totalCount) {
-  const total = Math.min(totalCount, RESPONSE_LIMIT);
-  const pct = (total / RESPONSE_LIMIT) * 100;
-  document.getElementById('spCount').textContent = `${total} / ${RESPONSE_LIMIT} Responses`;
+function imgAvg(imgId) {
+  const r = imageRatings[imgId];
+  return r && r.count > 0 ? r.total / r.count : null;
+}
+
+function updateProgress(total) {
+  const capped = Math.min(total, RESPONSE_LIMIT);
+  const pct = (capped / RESPONSE_LIMIT) * 100;
+  document.getElementById('spCount').textContent = `${capped} / ${RESPONSE_LIMIT} Responses`;
   const fill = document.getElementById('spFill');
   fill.style.width = pct + '%';
-  if(total >= RESPONSE_LIMIT) {
+  if (capped >= RESPONSE_LIMIT) {
     fill.classList.add('done');
     document.getElementById('spSub').textContent = '✓ All responses collected — study is complete';
     document.getElementById('spSub').style.color = 'rgba(40,167,69,0.7)';
   } else {
-    const remaining = RESPONSE_LIMIT - total;
-    document.getElementById('spSub').textContent = `${remaining} more response${remaining !== 1 ? 's' : ''} needed to complete the study`;
+    const rem = RESPONSE_LIMIT - capped;
+    document.getElementById('spSub').textContent = `${rem} more response${rem!==1?'s':''} needed`;
   }
 }
 
-// ── Render main chart/rankings ──
+// ── Render main page (chart + rankings by person average) ──
 function renderMain() {
   const root = document.getElementById('root');
-  
   if (participantCount === 0) {
-    root.innerHTML = `<div class="no-data"><h3>No ratings yet</h3><p>Ratings will appear here after participants submit.<br/>Data is synced globally via the cloud.</p></div>`;
+    root.innerHTML = `<div class="no-data"><h3>No ratings yet</h3><p>Ratings will appear here after participants submit.</p></div>`;
     return;
   }
-  
-  const results = aliases.map(alias => ({
-    alias, avg: counts[alias] > 0 ? totals[alias] / counts[alias] : 0, responses: counts[alias]
-  })).sort((a,b) => b.avg - a.avg);
 
-  const overallAvg = totalRatings > 0 ? (Object.values(totals).reduce((a,b) => a + b, 0) / totalRatings).toFixed(2) : '—';
+  // Compute per-person averages (average across all 5 images × all participants)
+  const personResults = PERSONS.map(num => {
+    const imgIds = Array.from({length:5},(_,i)=>`P${num}_${i+1}`);
+    let total = 0, count = 0;
+    imgIds.forEach(id => {
+      const r = imageRatings[id];
+      if (r) { total += r.total; count += r.count; }
+    });
+    return { num, alias:`Person ${num}`, avg: count > 0 ? total/count : 0, responses: count };
+  }).sort((a,b) => b.avg - a.avg);
+
+  const overallAvg = totalRatings > 0 ? (ALL_IMAGES.reduce((s,id) => s + imageRatings[id].total, 0) / totalRatings).toFixed(2) : '—';
+
   const statsHTML = `<div class="stats">
     <div class="stat"><div class="stat-val">${participantCount}</div><div class="stat-label">Participants</div></div>
     <div class="stat"><div class="stat-val">${totalRatings}</div><div class="stat-label">Total Ratings</div></div>
     <div class="stat"><div class="stat-val">${overallAvg}</div><div class="stat-label">Overall Avg</div></div>
   </div>`;
 
-  const chartOrdered = [...results].sort((a,b) => b.avg - a.avg);
-  const maxAvg = Math.max(...chartOrdered.map(r => r.avg), 1);
+  const maxAvg = Math.max(...personResults.map(r=>r.avg), 1);
   const MAX_PX = 200;
-  
-  const bars = chartOrdered.map(r => {
+  const bars = personResults.map(r => {
     const colH = Math.round((r.avg / maxAvg) * MAX_PX);
-    const num = r.alias.split(' ')[1];
     return `<div class="bar-col">
       <div class="bar-outer" style="height:${colH}px">
         <div class="bar-track"></div>
@@ -506,51 +509,94 @@ function renderMain() {
           <div class="bar-avg">${r.avg > 0 ? r.avg.toFixed(1) : ''}</div>
         </div>
       </div>
-      <img class="bar-avatar" src="celebrities/P${num}_1.png" alt="${r.alias}" onerror="this.style.background='rgba(255,77,109,0.2)'"/>
-      <div class="bar-name">${r.alias.replace('Person ','P')}</div>
+      <img class="bar-avatar" src="celebrities/P${r.num}_1.png" alt="${r.alias}" onerror="this.style.background='rgba(255,77,109,0.2)'"/>
+      <div class="bar-name">P${r.num}</div>
     </div>`;
   }).join('');
 
-  const rankRows = results.map((r,i) => {
-    const cls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
-    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`;
-    const pct = (r.avg / 10) * 100;
-    const num = r.alias.split(' ')[1];
+  const rankRows = personResults.map((r,i) => {
+    const cls = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`;
+    const pct = (r.avg/10)*100;
     return `<div class="rank-row ${cls}">
       <div class="rank-badge">${medal}</div>
-      <img class="rank-avatar" src="celebrities/P${num}_1.png" alt="${r.alias}" onerror="this.src='';this.style.background='rgba(255,77,109,0.2)'"/>
+      <img class="rank-avatar" src="celebrities/P${r.num}_1.png" alt="${r.alias}" onerror="this.src='';this.style.background='rgba(255,77,109,0.2)'"/>
       <div class="rank-info">
         <div class="rank-alias">${r.alias}</div>
         <div class="rank-bar-track"><div class="rank-bar-fill" style="width:0%" data-w="${pct.toFixed(1)}"></div></div>
       </div>
-      <div class="rank-responses">${r.responses} rating${r.responses !== 1 ? 's' : ''}</div>
+      <div class="rank-responses">${r.responses} rating${r.responses!==1?'s':''}</div>
       <div class="rank-score">${r.avg > 0 ? r.avg.toFixed(2) : '—'}</div>
     </div>`;
   }).join('');
 
-  root.innerHTML = statsHTML + `<div class="chart-card"><div class="chart-title">Average Rating Distribution</div><div class="chart-area">${bars}</div></div><div class="section-title">Rankings</div><div class="rank-list">${rankRows}</div>`;
+  root.innerHTML = statsHTML
+    + `<div class="chart-card"><div class="chart-title">Average Rating Distribution — 50 People</div><div class="chart-area">${bars}</div></div>`
+    + `<div class="section-title">Rankings</div><div class="rank-list">${rankRows}</div>`;
 
   setTimeout(() => {
-    document.querySelectorAll('.bar').forEach(el => { el.style.height = '100%'; el.querySelector('.bar-avg').classList.add('visible'); });
-    document.querySelectorAll('.rank-bar-fill').forEach(el => { el.style.width = el.dataset.w + '%'; });
+    document.querySelectorAll('.bar').forEach(el => { el.style.height='100%'; el.querySelector('.bar-avg').classList.add('visible'); });
+    document.querySelectorAll('.rank-bar-fill').forEach(el => { el.style.width = el.dataset.w+'%'; });
   }, 120);
 }
 
-// ── Build data table for modal ──
+// ── Build data table: rows=images, cols=participants, last col=AVERAGE ──
+// Matches CSV layout exactly
 function buildDataTable() {
-  const tbody = document.getElementById('rptDataBody');
-  if (allRows.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="11" class="rpt-no-data">No data yet</td></tr>`;
-  } else {
-    tbody.innerHTML = allRows.map((row, idx) => {
-      const cells = aliases.map(a => `<td>${row.ratings[a] !== undefined ? row.ratings[a] : '—'}</td>`).join('');
-      return `<tr><td>Participant ${idx + 1} (${row.pid})</td>${cells}</tr>`;
-    }).join('');
+  const wrap = document.getElementById('rptDataTableWrap');
+  if (orderedPids.length === 0) {
+    wrap.innerHTML = `<div class="rpt-no-data">No data yet</div>`;
+    return;
   }
-  aliases.forEach((a, i) => {
-    const el = document.getElementById('avg' + (String(i + 1).padStart(2, '0')));
-    if (el) el.textContent = counts[a] > 0 ? (totals[a] / counts[a]).toFixed(2) : '—';
-  });
+
+  // Header row: Image Name | P-xxx … | AVERAGE
+  const thCells = orderedPids.map(pid => `<th>${pid}</th>`).join('');
+  const theadHTML = `<thead>
+    <tr>
+      <th>Image Name</th>
+      ${thCells}
+      <th style="color:var(--orange)">AVERAGE</th>
+    </tr>
+    <tr style="font-size:0.55rem;color:rgba(255,255,255,0.2);">
+      <td>Person</td>
+      ${orderedPids.map(pid=>`<td>Participant ${pid}</td>`).join('')}
+      <td>All Participants</td>
+    </tr>
+    <tr style="font-size:0.55rem;color:rgba(255,255,255,0.18);">
+      <td>Image #</td>
+      ${orderedPids.map(()=>`<td>(1-10)</td>`).join('')}
+      <td>(1-10)</td>
+    </tr>
+  </thead>`;
+
+  // Body rows: one per image
+  const tbodyRows = ALL_IMAGES.map(imgId => {
+    const scoreCells = orderedPids.map(pid => {
+      const s = participantRatings[pid]?.[imgId];
+      return `<td>${s !== undefined ? s : '—'}</td>`;
+    }).join('');
+    const avg = imgAvg(imgId);
+    return `<tr>
+      <td>${imgId}.png</td>
+      ${scoreCells}
+      <td style="color:var(--orange);font-weight:700">${avg !== null ? avg.toFixed(2) : '—'}</td>
+    </tr>`;
+  }).join('');
+
+  // Footer: per-participant average
+  const tfootCells = orderedPids.map(pid => {
+    const scores = ALL_IMAGES.map(id => participantRatings[pid]?.[id]).filter(v => v !== undefined);
+    const avg = scores.length > 0 ? (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(2) : '—';
+    return `<td>${avg}</td>`;
+  }).join('');
+  const overallAvg = totalRatings > 0
+    ? (ALL_IMAGES.reduce((s,id)=>s+imageRatings[id].total,0)/totalRatings).toFixed(2) : '—';
+  const tfootHTML = `<tfoot><tr class="avg-row"><td>AVERAGE</td>${tfootCells}<td style="color:var(--orange)">${overallAvg}</td></tr></tfoot>`;
+
+  wrap.innerHTML = `<table class="rpt-data-tbl">${theadHTML}<tbody>${tbodyRows}</tbody>${tfootHTML}</table>`;
+
+  // Update modal stat counts
+  document.getElementById('rptImgCount').textContent = ALL_IMAGES.length;
 }
 
 function stampMeta() {
